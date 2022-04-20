@@ -1,0 +1,25 @@
+{
+  "snap_up": 1,
+  "pick_up_needed": false,
+  "monitor_needed": true,
+  "notify_needed": true,
+  "notify_interval": 5,
+  "headers": {
+    "cookie": "DDXQSESSID=",
+    "ddmc-city-number": "0101",
+    "ddmc-device-id": "",
+    "ddmc-latitude": "",
+    "ddmc-longitude": "",
+    "ddmc-station-id": "",
+    "ddmc-uid": "",
+    "user-agent": ""
+  },
+  "params": {
+    "address_id": "",
+    "device_token": ""
+  },
+  "users": [
+    "xxx",
+    "yyy"
+  ]
+}
