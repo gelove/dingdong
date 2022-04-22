@@ -62,6 +62,24 @@ localhost:9999/set?users=xxx,yyy&snap_up=1&pick_up_needed=1&monitor_needed=1&not
 
 <img src="/assets/notify.jpeg" width="300" alt="notify" />
 
+## 执行程序
+
+### macOS
+
+在终端中执行
+
+```ssh
+./dingdong
+```
+
+### windows
+
+在CMD中执行
+
+```ssh
+./dingdong.ext
+```
+
 ### 版权说明
 
 **本项目为 GPL3.0 协议，请所有进行二次开发的开发者遵守 GPL3.0 协议，并且不得将代码用于商用。**
