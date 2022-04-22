@@ -47,9 +47,9 @@ func ToTimeWithLayout(str, layout string) time.Time {
 	if str == "" {
 		return Zero
 	}
-	result, err := time.Parse(layout, str)
+	result, err := time.ParseInLocation(layout, str, time.Local)
 	if err != nil {
 		panic(err)
 	}
-	return result
+	return result.In(time.Local)
 }
