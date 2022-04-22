@@ -1,0 +1,87 @@
+name: dingdong-release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - 1.18
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: upx
+        run: upx -V
+
+      # Cache go build cache, used to speedup go test
+      - name: Setup Golang caches
+        uses: actions/cache@v3
+        with:
+          path: |
+            /go/pkg/.cache/go-build
+            /go/pkg/mod
+          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-golang-
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Mod download
+        run: go mod tidy
+
+      - run: mkdir -p build
+
+      - name: Build with xgo
+        uses: TianTianBigWang/ghaction-xgo@master
+        with:
+          xgo_version: v0.1
+          go_version: ${{ matrix.go_version }}
+          pkg: cmd/dingdong
+          dest: build
+          prefix: dingdong
+          targets: windows/amd64,darwin/amd64,darwin/arm64,linux/amd64,linux/arm64
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w
+          buildmode: default
+
+      - name: Move
+        run: |
+          ls ./build
+          mkdir -p release
+          mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong_windows_amd64.exe
+          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong_darwin_amd64 && chmod +x release/dingdong_darwin_amd64
+          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong_darwin_arm64 && chmod +x release/dingdong_darwin_arm64
+          mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong_linux_amd64 && chmod +x release/dingdong_linux_amd64
+          mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong_linux_arm64 && chmod +x release/dingdong_linux_arm64
+
+          cd release
+          zip -q -r dingdong_windows_amd64.zip dingdong_windows_amd64.exe
+          tar -zcvf dingdong_darwin_amd64.tar.gz dingdong_darwin_amd64
+          tar -zcvf dingdong_darwin_arm64.tar.gz dingdong_darwin_arm64
+          tar -zcvf dingdong_linux_amd64.tar.gz dingdong_linux_amd64
+          tar -zcvf dingdong_linux_arm64.tar.gz dingdong_linux_arm64
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/dingdong_windows_amd64.zip
+            release/dingdong_linux_amd64.tar.gz
+            release/dingdong_linux_arm64.tar.gz
+            release/dingdong_darwin_amd64.tar.gz
+            release/dingdong_darwin_arm64.tar.gz
