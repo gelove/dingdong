@@ -63,7 +63,3 @@ localhost:9999/set?users=xxx,yyy&snap_up=1&pick_up_needed=1&monitor_needed=1&not
 ### 版权说明
 
 **本项目为 GPL3.0 协议，请所有进行二次开发的开发者遵守 GPL3.0 协议，并且不得将代码用于商用。**
-
-```
-
-```
