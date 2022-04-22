@@ -8,7 +8,7 @@
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
 
-QQ群: 60768433
+QQ群: 60768433 (golang & rust & blockchain & flutter 交流学习)
 
 ### 配置文件 config.json 设置
 
