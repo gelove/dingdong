@@ -5,7 +5,6 @@ import (
 )
 
 const (
-	Local      = "Asia/Shanghai"
 	Space      = " "
 	YMD        = "2006-01-02"
 	HIS        = "15:04:05"
@@ -18,9 +17,20 @@ const (
 
 var Zero = time.Unix(0, 0)
 
+// 全局设置时区
+func init() {
+	var local = time.FixedZone("CST", 8*3600) // 东八区
+	time.Local = local
+}
+
 // Today 当天
 func Today() string {
 	return time.Now().Format(CommonDay)
+}
+
+func Unix(hour, min int) int64 {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), hour, min, 0, 0, time.Local).Unix()
 }
 
 func FirstSnapUpTime() time.Time {
@@ -37,13 +47,9 @@ func ToTimeWithLayout(str, layout string) time.Time {
 	if str == "" {
 		return Zero
 	}
-	loc, err := time.LoadLocation(Local)
+	result, err := time.Parse(layout, str)
 	if err != nil {
 		panic(err)
 	}
-	result, err := time.ParseInLocation(layout, str, loc)
-	if err != nil {
-		panic(err)
-	}
-	return result.In(loc)
+	return result
 }

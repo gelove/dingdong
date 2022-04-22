@@ -11,25 +11,47 @@ import (
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/pkg/textual"
 
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
 
-func GetCheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes) (map[string]interface{}, error) {
+func filterFields(data map[string]interface{}, fields []string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range data {
+		if !textual.InArray(k, fields) {
+			continue
+		}
+		res[k] = v
+	}
+	return res
+}
+
+func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes) (map[string]interface{}, error) {
 	url := "https://maicai.api.ddxq.mobi/order/checkOrder"
 	conf := config.Get()
 
-	packagesInfo := make(map[string]interface{})
-	for k, v := range cartMap {
-		packagesInfo[k] = v
+	packages := make(map[string]interface{})
+	for key, val := range cartMap {
+		if key == "products" {
+			productFields := []string{"id", "category_path", "count", "price", "total_money", "instant_rebate_money", "activity_id", "conditions_num", "product_type", "sizes", "type", "total_origin_money", "price_type", "batch_type", "sub_list", "order_sort", "origin_price"}
+			items := val.([]map[string]interface{})
+			products := make([]map[string]interface{}, 0)
+			for _, item := range items {
+				products = append(products, filterFields(item, productFields))
+			}
+			packages[key] = products
+			continue
+		}
+		packages[key] = val
 	}
-	packagesInfo["reserved_time"] = map[string]interface{}{
+	packages["reserved_time"] = map[string]interface{}{
 		"reserved_time_start": reserveTime.StartTimestamp,
 		"reserved_time_end":   reserveTime.EndTimestamp,
 	}
-	packagesJson := json.MustEncodeToString([]interface{}{packagesInfo})
+	packagesJson := json.MustEncodeToString([]interface{}{packages})
 
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
@@ -68,15 +90,18 @@ func GetCheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoT
 	if err != nil {
 		return nil, errs.Wrap(code.ParseFailed, err)
 	}
+
 	order := json.Get(body, "data", "order")
 	// log.Println("data.order", order.ToString())
-
+	freight := order.Get("freights", 0, "freight")
 	res := map[string]interface{}{
-		"price":                  order.Get("total_money").ToString(),
-		"freight_money":          order.Get("freight_money").ToString(),                                  // 运费
-		"freight_discount_money": order.Get("freight_discount_money").ToString(),                         // 运费折扣
-		"order_freight":          order.Get("freights", "0", "freight", "freight_real_money").ToString(), // 订单真实运费
-		"user_ticket_id":         order.Get("default_coupon", "_id").ToString(),
+		"price":                  order.Get("total_money").ToString(),              // 总价
+		"freight_money":          freight.Get("freight_money").ToString(),          // 运费
+		"freight_discount_money": freight.Get("discount_freight_money").ToString(), // 运费折扣
+		"order_freight":          freight.Get("freight_real_money").ToString(),     // 订单真实运费
+	}
+	if order.Get("default_coupon", "_id").ToString() != "" {
+		res["user_ticket_id"] = order.Get("default_coupon", "_id").ToString() // 优惠券id
 	}
 	log.Println("订单总金额 =>", res["price"])
 	return res, nil
@@ -108,18 +133,32 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	}
 
 	packages := map[string]interface{}{
-		"reserved_time_start":     reserveTime.StartTimestamp,
-		"reserved_time_end":       reserveTime.EndTimestamp,
-		"eta_trace_id":            "",
-		"soon_arrival":            "",
-		"first_selected_big_time": 0,
-		"receipt_without_sku":     0,
+		"reserved_time_start": reserveTime.StartTimestamp,
+		"reserved_time_end":   reserveTime.EndTimestamp,
+		"eta_trace_id":        "",
+		"soon_arrival":        "",
+		// "first_selected_big_time": 0,
+		"first_selected_big_time": 1,
 	}
-	for k, v := range cartMap {
-		if v == nil {
+	fields := []string{"products", "only_today_products", "only_tomorrow_products", "can_used_balance_money", "can_used_point_money", "can_used_point_num", "cart_count", "front_package_bg_color", "front_package_stock_color", "front_package_text", "front_package_type", "goods_real_money", "instant_rebate_money", "is_presale", "is_share_station", "is_supply_order", "package_id", "package_type", "total_count", "total_money", "total_origin_money", "total_rebate_money", "used_balance_money", "used_point_money", "used_point_num"}
+	for key, val := range cartMap {
+		if val == nil {
 			continue
 		}
-		packages[k] = v
+		if !textual.InArray(key, fields) {
+			continue
+		}
+		if key == "products" {
+			productFields := []string{"id", "parent_id", "count", "cart_id", "price", "product_type", "is_booking", "product_name", "small_image", "sale_batches", "order_sort", "sizes"}
+			items := val.([]map[string]interface{})
+			products := make([]map[string]interface{}, 0)
+			for _, item := range items {
+				products = append(products, filterFields(item, productFields))
+			}
+			packages[key] = products
+			continue
+		}
+		packages[key] = val
 	}
 
 	packageOrder := map[string]interface{}{
@@ -134,6 +173,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	params["showData"] = "true"
 	params["showMsg"] = "false"
 	params["ab_config"] = `{"key_onion":"C"}`
+	log.Printf("AddNewOrder params => %#v", params)
 	form, err := session.Sign(params)
 	if err != nil {
 		return errs.Wrap(code.SignFailed, err)

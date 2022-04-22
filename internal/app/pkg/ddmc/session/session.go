@@ -28,9 +28,9 @@ type session struct {
 
 func Initialize(jsFile string) {
 	once.Do(func() {
-		// client := req.DevMode()
-		client := req.C()
-		// client := req.C().
+		// client := req.DevMode().EnableForceHTTP1()
+		client := req.C().EnableForceHTTP1()
+		// client := req.C().EnableForceHTTP1()
 		// 	SetCommonRetryCondition(retryCondition).
 		// 	SetCommonRetryInterval(retryInterval).
 		// 	SetCommonRetryHook(retryHook).
@@ -81,12 +81,12 @@ func GetHeaders() map[string]string {
 	// headers["accept-encoding"] = "gzip, deflate, br" // 压缩有乱码
 	headers["ddmc-api-version"] = "9.50.0"
 	headers["ddmc-app-client-id"] = "4"
-	headers["ddmc-build-version"] = "2.83.0"
+	headers["ddmc-build-version"] = "2.83.1"
 	headers["ddmc-channel"] = "applet"
 	headers["ddmc-ip"] = ""
 	headers["ddmc-os-version"] = "[object Undefined]"
 	headers["ddmc-time"] = strconv.Itoa(int(time.Now().Unix()))
-	headers["referer"] = "https://servicewechat.com/wx1e113254eda17715/425/page-frame.html"
+	headers["referer"] = "https://servicewechat.com/wx1e113254eda17715/430/page-frame.html"
 
 	h := config.Get().Headers
 	headers["cookie"] = h["cookie"]
@@ -104,14 +104,14 @@ func GetHeaders() map[string]string {
 func GetParams(headers map[string]string) map[string]string {
 	params := make(map[string]string)
 	params["api_version"] = headers["ddmc-api-version"]
-	params["app_version "] = headers["ddmc-build-version"]
+	params["app_version"] = headers["ddmc-build-version"]
 	params["app_client_id"] = "4"
 	params["applet_source"] = ""
 	params["channel"] = "applet"
 	params["city_number"] = headers["ddmc-city-number"]
 	params["h5_source"] = ""
 	params["longitude"] = headers["ddmc-longitude"]
-	params["latitude "] = headers["ddmc-latitude"]
+	params["latitude"] = headers["ddmc-latitude"]
 	params["openid"] = headers["ddmc-device-id"]
 	params["s_id"] = strings.TrimLeft(headers["cookie"], "DDXQSESSID=")
 	params["sharer_uid"] = ""

@@ -3,8 +3,6 @@ package service
 import (
 	"log"
 	"net/http"
-	"strings"
-	"sync"
 	"time"
 
 	"dingdong/internal/app/config"
@@ -82,59 +80,6 @@ func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes,
 	}
 	log.Println("发现可用的配送时段, 请尽快下单!")
 	return validTimes[0], nil
-}
-
-func GetMultiReserveTimeAndNotify(cartMap map[string]interface{}) {
-	_, err := GetMultiReserveTime(cartMap)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	conf := config.Get()
-	if conf.NotifyNeeded {
-		notify()
-	}
-}
-
-func notify() {
-	now := time.Now()
-	conf := config.Get()
-	interval := time.Duration(conf.NotifyInterval) * time.Minute
-	if now.Before(lastNotify.Add(interval)) {
-		return
-	}
-	lastNotify = now
-	list, err := GetHomeFlowDetail()
-	if err != nil {
-		log.Printf("获取首页流量失败 => %+v", err)
-	}
-	productNames := make([]string, 0, 10)
-	for i, item := range list {
-		if i >= 10 {
-			continue
-		}
-		letter := []rune(item.Name)
-		if len(letter) > 5 {
-			productNames = append(productNames, string(letter[:5]))
-			continue
-		}
-		productNames = append(productNames, string(letter))
-	}
-	ellipsis := ""
-	if len(list) >= 10 {
-		ellipsis = "..."
-	}
-	products := strings.Join(productNames, " ")
-	wg := new(sync.WaitGroup)
-	for _, v := range conf.Users {
-		wg.Add(1)
-		go func(key string) {
-			defer wg.Done()
-			Push(key, products, ellipsis)
-		}(v)
-	}
-	wg.Wait()
 }
 
 func filterValidTimes(times []*reserve_time.GoTimes) []*reserve_time.GoTimes {

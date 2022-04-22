@@ -3,6 +3,7 @@ package bark
 import (
 	"fmt"
 	"net/http"
+	"sync"
 
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
@@ -13,7 +14,7 @@ import (
 
 const barkURL = "https://api.day.app/push"
 
-var m = make(map[string]notify.Notifier)
+var cache sync.Map
 
 type data struct {
 	Badge     int    `json:"badge,omitempty"`
@@ -33,15 +34,18 @@ type bark struct {
 }
 
 func New(key, icon, sound string) notify.Notifier {
-	if _, ok := m[key]; !ok {
-		m[key] = &bark{key: key, icon: icon, sound: sound}
+	if v, ok := cache.Load(key); ok {
+		return v.(notify.Notifier)
 	}
-	return m[key]
+	instance := &bark{key: key, icon: icon, sound: sound}
+	cache.Store(key, instance)
+	return instance
 }
 
 func Reset(key, icon, sound string) notify.Notifier {
-	m[key] = &bark{key: key, icon: icon, sound: sound}
-	return m[key]
+	instance := &bark{key: key, icon: icon, sound: sound}
+	cache.Store(key, instance)
+	return instance
 }
 
 func (b *bark) Name() string {

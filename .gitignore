@@ -1,4 +1,4 @@
 .idea
 config.json
-release
-dingdong
+/release
+/dingdong

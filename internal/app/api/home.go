@@ -44,7 +44,7 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Form.Get("pick_up_needed") != "" {
 		pickUpNeeded := r.Form.Get("pick_up_needed")
-		conf.MonitorNeeded = pickUpNeeded != "0"
+		conf.PickUpNeeded = pickUpNeeded != "0"
 	}
 	if r.Form.Get("monitor_needed") != "" {
 		monitorNeeded := r.Form.Get("monitor_needed")
