@@ -4,9 +4,15 @@
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
 
-[Charles 抓包教程(Mac)](https://www.jianshu.com/p/ff85b3dac157)
+### iphone (请在闲时可购买时抓包)
+1. iphone上通过App Store安装Stream
+2. 打开叮咚买菜微信小程序和Stream, Stream点击"开始抓包"
+3. 回到叮咚买菜微信小程序, 商品加入购物车并结算提交(无需付款)使得小程序发起网络请求
+4. 回到Stream停止抓包并查看抓包历史, 点击按域名, 会看到 maicai.api.ddxq.mobi 这个域名下的请求
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
+
+[Charles 抓包教程(Mac)](https://www.jianshu.com/p/ff85b3dac157)
 
 QQ群: 60768433 (golang & rust & blockchain & flutter 交流学习)
 
