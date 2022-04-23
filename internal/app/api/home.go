@@ -34,6 +34,22 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, "没有提交任何有效的更新\n")
 		return
 	}
+	if r.Form.Get("base_concurrency") != "" {
+		baseConcurrency, err := strconv.Atoi(r.Form.Get("base_concurrency"))
+		if err != nil {
+			_, _ = io.WriteString(w, err.Error())
+			return
+		}
+		conf.BaseConcurrency = baseConcurrency
+	}
+	if r.Form.Get("submit_concurrency") != "" {
+		submitConcurrency, err := strconv.Atoi(r.Form.Get("submit_concurrency"))
+		if err != nil {
+			_, _ = io.WriteString(w, err.Error())
+			return
+		}
+		conf.SubmitConcurrency = submitConcurrency
+	}
 	if r.Form.Get("snap_up") != "" {
 		snapUp, err := strconv.Atoi(r.Form.Get("snap_up"))
 		if err != nil {

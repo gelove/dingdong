@@ -1,7 +1,9 @@
 {
   "addr": ":9999",
+  "base_concurrency": 1,
+  "submit_concurrency": 2,
   "snap_up": 1,
-  "pick_up_needed": false,
+  "pick_up_needed": true,
   "monitor_needed": true,
   "notify_needed": true,
   "notify_interval": 5,

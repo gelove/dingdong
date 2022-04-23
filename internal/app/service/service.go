@@ -11,7 +11,6 @@ import (
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/date"
-	"dingdong/pkg/json"
 )
 
 const (
@@ -20,13 +19,8 @@ const (
 )
 
 const (
-	baseConcurrencySize   = 2
-	submitConcurrencySize = 2
-)
-
-const (
-	durationMinMillis = 400
-	durationMaxMillis = 500
+	durationMinMillis = 450
+	durationMaxMillis = 550
 	durationGapMillis = durationMaxMillis - durationMinMillis
 )
 
@@ -94,11 +88,10 @@ func (t *Task) AllCheck() {
 		err := AllCheck()
 		if err != nil {
 			log.Println(err)
-		} else {
-			return
+			duration := durationMinMillis + rand.Intn(durationGapMillis)
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
-		duration := 3000 + rand.Intn(2000)
-		<-time.After(time.Duration(duration) * time.Millisecond)
+		return
 	}
 }
 
@@ -107,12 +100,12 @@ func (t *Task) GetCart() {
 		if t.Completed {
 			return
 		}
-		log.Println("===== 获取有效的商品 =====")
 		cartMap, err := GetCart()
 		if err != nil {
 			log.Println(err)
 		} else {
 			t.SetCartMap(cartMap)
+			log.Println("===== 购物车商品已更新 =====")
 		}
 		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
@@ -128,13 +121,13 @@ func (t *Task) GetMultiReserveTime() {
 			<-time.After(20 * time.Millisecond)
 			continue
 		}
-		log.Println("===== 获取有效的配送时段 =====")
 		reserveTime, err := GetMultiReserveTime(t.CartMap())
 		if err != nil {
 			log.Println(err)
 		} else {
 			t.SetReserveTime(reserveTime)
-			log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
+			log.Println("===== 有效配送时段已更新 =====")
+			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
 		}
 		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
@@ -150,12 +143,12 @@ func (t *Task) CheckOrder() {
 			<-time.After(20 * time.Millisecond)
 			continue
 		}
-		log.Println("===== 生成订单信息 =====")
 		checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
 		if err != nil {
 			log.Println(err)
 		} else {
 			t.SetCheckOrderMap(checkOrderMap)
+			log.Println("===== 订单信息已更新 =====")
 		}
 		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
@@ -171,7 +164,6 @@ func (t *Task) AddNewOrder() {
 			<-time.After(5 * time.Millisecond)
 			continue
 		}
-		log.Println("===== 提交订单 =====")
 		err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 		if err != nil {
 			log.Println(err)
@@ -180,8 +172,10 @@ func (t *Task) AddNewOrder() {
 			continue
 		}
 		t.Completed = true
+		detail := "已成功下单, 请尽快完成支付"
+		log.Println(detail)
 		conf := config.Get()
-		Push(conf.Users[0], "已成功下单, 请尽快完成支付")
+		Push(conf.Users[0], detail)
 		return
 	}
 }
@@ -191,13 +185,13 @@ func timeTrigger() bool {
 	now := time.Now()
 	firstTime := date.FirstSnapUpUnix()
 	// log.Println(conf.SnapUp&FirstSnapUp == FirstSnapUp, now, firstTime, now.Unix(), firstTime)
-	if conf.SnapUp&FirstSnapUp == FirstSnapUp && now.Unix() == firstTime-30 {
+	if conf.SnapUp&FirstSnapUp == FirstSnapUp && now.Unix() == firstTime-20 {
 		log.Println("===== 6点抢购开始 =====")
 		return true
 	}
 	secondTime := date.SecondSnapUpUnix()
 	// log.Println(conf.SnapUp&SecondSnapUp == SecondSnapUp, now, secondTime, now.Unix(), secondTime)
-	if conf.SnapUp&SecondSnapUp == SecondSnapUp && now.Unix() == secondTime-30 {
+	if conf.SnapUp&SecondSnapUp == SecondSnapUp && now.Unix() == secondTime-20 {
 		log.Println("===== 8点半抢购开始 =====")
 		return true
 	}
@@ -205,7 +199,9 @@ func timeTrigger() bool {
 }
 
 func SnapUpOnce() {
-	for i := 0; i < baseConcurrencySize; i++ {
+	conf := config.Get()
+
+	for i := 0; i < conf.BaseConcurrency; i++ {
 		go task.AllCheck()
 
 		go task.GetCart()
@@ -215,11 +211,11 @@ func SnapUpOnce() {
 		go task.CheckOrder()
 	}
 
-	for i := 0; i < submitConcurrencySize; i++ {
+	for i := 0; i < conf.SubmitConcurrency; i++ {
 		go task.AddNewOrder()
 	}
 
-	timer := time.NewTimer(time.Minute * 3)
+	timer := time.NewTimer(time.Minute * 2)
 	<-timer.C
 }
 
