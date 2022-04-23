@@ -16,8 +16,11 @@ func Run() {
 	go service.SnapUp()
 	go service.PickUp()
 	go service.Notify()
+
 	http.HandleFunc("/", api.SayWelcome)
 	http.HandleFunc("/set", api.SetConfig)
+	http.HandleFunc("/address", api.GetAddress)
+
 	conf := config.Get()
 	err := http.ListenAndServe(conf.Addr, nil)
 	if err != nil {

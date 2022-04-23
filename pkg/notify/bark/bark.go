@@ -12,7 +12,7 @@ import (
 	"dingdong/pkg/notify"
 )
 
-const barkURL = "https://api.day.app/push"
+const URL = "https://api.day.app/push"
 
 var cache sync.Map
 
@@ -64,7 +64,7 @@ func (b *bark) Send(title, body string) error {
 	resp, err := session.Client().R().
 		SetHeader("Content-Type", "application/json; charset=utf-8").
 		SetBody(json.MustEncode(d)).
-		Send(http.MethodPost, barkURL)
+		Send(http.MethodPost, URL)
 	if err != nil {
 		return errs.Wrap(code.RequestFailed, err)
 	}

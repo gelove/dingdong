@@ -287,14 +287,24 @@ func Notify() {
 		}
 		products := strings.Join(productNames, " ")
 		wg := new(sync.WaitGroup)
-		for k, v := range conf.Users {
-			if k > 0 {
+		for _, v := range conf.Users {
+			if v == "" {
 				continue
 			}
 			wg.Add(1)
-			go func(key string) {
+			go func(token string) {
 				defer wg.Done()
-				Push(key, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+				Push(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+			}(v)
+		}
+		for _, v := range conf.AndroidUsers {
+			if v == "" {
+				continue
+			}
+			wg.Add(1)
+			go func(token string) {
+				defer wg.Done()
+				PushToAndroid(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 			}(v)
 		}
 		wg.Wait()

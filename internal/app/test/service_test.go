@@ -12,7 +12,16 @@ import (
 
 func TestPush(t *testing.T) {
 	conf := config.Get()
-	service.Push(conf.Users[0], "测试")
+	if len(conf.Users) > 0 {
+		service.Push(conf.Users[0], "测试")
+	}
+}
+
+func TestPushToAndroid(t *testing.T) {
+	conf := config.Get()
+	if len(conf.AndroidUsers) > 0 {
+		service.PushToAndroid(conf.AndroidUsers[0], "测试")
+	}
 }
 
 func TestGetHomeFlowDetail(t *testing.T) {

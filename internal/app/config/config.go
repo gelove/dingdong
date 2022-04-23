@@ -19,9 +19,10 @@ type Config struct {
 	MonitorNeeded     bool              `json:"monitor_needed"`     // 监视器开关 监视是否有可配送时段
 	NotifyNeeded      bool              `json:"notify_needed"`      // 通知开关 发现有可配送时段时通知大家有可购商品
 	NotifyInterval    int               `json:"notify_interval"`    // 通知间隔 单位: 分钟
-	Headers           map[string]string `json:"headers"`
-	Params            map[string]string `json:"params"`
-	Users             []string          `json:"users"`
+	Headers           map[string]string `json:"headers"`            // 请求头
+	Params            map[string]string `json:"params"`             // 请求参数
+	Users             []string          `json:"users"`              // bark 用户
+	AndroidUsers      []string          `json:"an_users"`           // android 用户
 }
 
 type conf struct {

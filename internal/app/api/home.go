@@ -9,11 +9,25 @@ import (
 	"strings"
 
 	"dingdong/internal/app/config"
+	"dingdong/internal/app/service"
 	"dingdong/pkg/json"
 )
 
 func SayWelcome(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintf(w, "Welcome to this website")
+}
+
+// GetAddress 获取地址
+func GetAddress(w http.ResponseWriter, _ *http.Request) {
+	list, err := service.GetAddress()
+	if err != nil {
+		_, _ = io.WriteString(w, err.Error()+"\n")
+		return
+	}
+	_, err = io.WriteString(w, json.MustEncodeToString(list)+"\n")
+	if err != nil {
+		log.Println("io.WriteString error =>", err)
+	}
 }
 
 // SetConfig 通过接口更新配置并重载配置
@@ -81,6 +95,10 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 	if r.Form.Get("users") != "" {
 		list := strings.Split(r.Form.Get("users"), ",")
 		conf.Users = append(conf.Users, list...)
+	}
+	if r.Form.Get("an_users") != "" {
+		list := strings.Split(r.Form.Get("an_users"), ",")
+		conf.AndroidUsers = append(conf.AndroidUsers, list...)
 	}
 
 	// 更新配置并写入文件

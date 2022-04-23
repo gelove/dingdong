@@ -21,8 +21,12 @@
     "address_id": "",
     "device_token": ""
   },
+  "an_users": [
+    "",
+    ""
+  ],
   "users": [
-    "xxx",
-    "yyy"
+    "",
+    ""
   ]
 }
