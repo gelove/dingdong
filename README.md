@@ -14,6 +14,8 @@
 
 [Charles 抓包教程(Mac)](https://www.jianshu.com/p/ff85b3dac157)
 
+<img src="/assets/wechat.jpeg" width="300" alt="微信群" />
+
 QQ群: 60768433 (golang & rust & blockchain & flutter 交流学习)
 
 ### 配置文件 config.json 设置
