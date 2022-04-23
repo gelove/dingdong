@@ -1,5 +1,12 @@
+# OS
+*.DS_Store
+
+# IDE
 .idea
-.DS_Store
+.vscode
+.history
+
+# Project
 config.json
 /release
 /dingdong
