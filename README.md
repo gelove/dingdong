@@ -1,5 +1,7 @@
 # 叮咚买菜助手
 
+[![dingdong-release](https://github.com/gelove/dingdong/actions/workflows/go.yml/badge.svg)](https://github.com/gelove/dingdong/actions/workflows/go.yml)
+
 ## 抢菜
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
