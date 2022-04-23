@@ -10,6 +10,24 @@ import (
 	"dingdong/pkg/json"
 )
 
+func BenchmarkSnapUpTime(b *testing.B) {
+	// 启动内存统计
+	b.ReportAllocs()
+
+	b.Run("FirstSnapUpTime", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = date.FirstSnapUpTime()
+		}
+	})
+
+	// 性能更好
+	b.Run("FirstSnapUpUnix", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = date.FirstSnapUpUnix()
+		}
+	})
+}
+
 func TestJsCall(t *testing.T) {
 	headers := session.GetHeaders()
 	headers["accept-language"] = "en-us"
@@ -68,9 +86,4 @@ func TestJsonEncode(t *testing.T) {
 	out := make(map[string]interface{})
 	json.MustDecodeFromString(str, &out)
 	t.Log(json.MustEncodeToString(out))
-}
-
-func TestSnapUpTime(t *testing.T) {
-	t.Log(date.FirstSnapUpTime())
-	t.Log(date.SecondSnapUpTime())
 }

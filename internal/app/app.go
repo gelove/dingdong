@@ -13,12 +13,13 @@ import (
 
 func Run() {
 	go Monitor()
-	go SnapUp()
-	go PickUp()
-	go Notify()
+	go service.SnapUp()
+	go service.PickUp()
+	go service.Notify()
 	http.HandleFunc("/", api.SayWelcome)
 	http.HandleFunc("/set", api.SetConfig)
-	err := http.ListenAndServe(":9999", nil)
+	conf := config.Get()
+	err := http.ListenAndServe(conf.Addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe => ", err)
 	}
@@ -50,16 +51,4 @@ func Monitor() {
 		duration := 8 + rand.Intn(8)
 		<-time.After(time.Duration(duration) * time.Second)
 	}
-}
-
-func SnapUp() {
-	service.SnapUp()
-}
-
-func PickUp() {
-	service.PickUp()
-}
-
-func Notify() {
-	service.Notify()
 }

@@ -5,14 +5,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	"dingdong/pkg/json"
 )
 
 type Config struct {
+	Addr           string            `json:"addr"`            // web服务地址
 	SnapUp         uint8             `json:"snap_up"`         // 抢购开关 0: 关 1: 6点抢 2: 8点半抢 3: 6点和8点半都抢
 	PickUpNeeded   bool              `json:"pick_up_needed"`  // 闲时捡漏开关
 	MonitorNeeded  bool              `json:"monitor_needed"`  // 监视器开关 监视是否有可配送时段
@@ -25,6 +24,7 @@ type Config struct {
 
 type conf struct {
 	sync.RWMutex
+	refresh  chan struct{}
 	Pid      int
 	FilePath string
 	Config   Config
@@ -32,6 +32,7 @@ type conf struct {
 
 func NewConf(pid int, path string) *conf {
 	return &conf{
+		refresh:  make(chan struct{}),
 		Pid:      pid,
 		FilePath: path,
 	}
@@ -47,12 +48,10 @@ func Initialize(path string) {
 	if !load() {
 		os.Exit(1)
 	}
-	// 热更新配置可能有多种触发方式，这里使用系统信号量sigusr1实现
-	s := make(chan os.Signal, 1)
-	signal.Notify(s, syscall.SIGUSR1)
+	// 热更新配置
 	go func() {
 		for {
-			<-s
+			<-c.refresh
 			if load() {
 				log.Println("热更新配置成功")
 			} else {
@@ -97,8 +96,8 @@ func Set(bytes []byte) error {
 	return ioutil.WriteFile(path, bytes, 0666)
 }
 
-func Reload() error {
-	return syscall.Kill(Pid(), syscall.SIGUSR1)
+func Reload() {
+	c.refresh <- struct{}{}
 }
 
 func Pid() int {

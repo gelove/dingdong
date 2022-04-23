@@ -62,6 +62,17 @@ localhost:9999/set?users=xxx,yyy&snap_up=1&pick_up_needed=1&monitor_needed=1&not
 
 <img src="/assets/notify.jpeg" width="300" alt="notify" />
 
+## 打包
+
+打包到release目录下
+
+```shell
+make build # 默认打包为macOS darwin-amd64 Intel处理器
+make build ARCH=arm64 # macOS M1处理器
+make build OS=linux # linux
+make build OS=windows # windows
+```
+
 ## 执行程序
 
 ### macOS

@@ -74,11 +74,7 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, err.Error())
 		return
 	}
-	err = config.Reload()
-	if err != nil {
-		_, _ = io.WriteString(w, err.Error())
-		return
-	}
+	config.Reload()
 	_, err = io.WriteString(w, "重载配置文件成功\n"+string(bs))
 	if err != nil {
 		log.Println("io.WriteString error =>", err)

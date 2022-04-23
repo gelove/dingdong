@@ -14,12 +14,23 @@ import (
 	"dingdong/pkg/json"
 )
 
-var task *Task
-
 const (
 	FirstSnapUp uint8 = iota + 1
 	SecondSnapUp
 )
+
+const (
+	baseConcurrencySize   = 2
+	submitConcurrencySize = 2
+)
+
+const (
+	durationMinMillis = 400
+	durationMaxMillis = 500
+	durationGapMillis = durationMaxMillis - durationMinMillis
+)
+
+var task *Task
 
 type Task struct {
 	notifyCh      chan struct{}
@@ -102,9 +113,8 @@ func (t *Task) GetCart() {
 			log.Println(err)
 		} else {
 			t.SetCartMap(cartMap)
-			return
 		}
-		duration := 50 + rand.Intn(50)
+		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
 	}
 }
@@ -125,9 +135,8 @@ func (t *Task) GetMultiReserveTime() {
 		} else {
 			t.SetReserveTime(reserveTime)
 			log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
-			return
 		}
-		duration := 50 + rand.Intn(50)
+		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
 	}
 }
@@ -147,9 +156,8 @@ func (t *Task) CheckOrder() {
 			log.Println(err)
 		} else {
 			t.SetCheckOrderMap(checkOrderMap)
-			return
 		}
-		duration := 50 + rand.Intn(50)
+		duration := durationMinMillis + rand.Intn(durationGapMillis)
 		<-time.After(time.Duration(duration) * time.Millisecond)
 	}
 }
@@ -167,7 +175,8 @@ func (t *Task) AddNewOrder() {
 		err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 		if err != nil {
 			log.Println(err)
-			<-time.After(5 * time.Millisecond)
+			duration := 100 + rand.Intn(50)
+			<-time.After(time.Duration(duration) * time.Millisecond)
 			continue
 		}
 		t.Completed = true
@@ -180,15 +189,15 @@ func (t *Task) AddNewOrder() {
 func timeTrigger() bool {
 	conf := config.Get()
 	now := time.Now()
-	firstTime := date.FirstSnapUpTime()
-	// log.Println(conf.SnapUp&FirstSnapUp == FirstSnapUp, now, firstTime, now.Unix(), firstTime.Unix())
-	if conf.SnapUp&FirstSnapUp == FirstSnapUp && now.Unix() == firstTime.Unix()-3 {
+	firstTime := date.FirstSnapUpUnix()
+	// log.Println(conf.SnapUp&FirstSnapUp == FirstSnapUp, now, firstTime, now.Unix(), firstTime)
+	if conf.SnapUp&FirstSnapUp == FirstSnapUp && now.Unix() == firstTime-30 {
 		log.Println("===== 6点抢购开始 =====")
 		return true
 	}
-	secondTime := date.SecondSnapUpTime()
-	// log.Println(conf.SnapUp&SecondSnapUp == SecondSnapUp, now, secondTime, now.Unix(), secondTime.Unix())
-	if conf.SnapUp&SecondSnapUp == SecondSnapUp && now.Unix() == secondTime.Unix()-3 {
+	secondTime := date.SecondSnapUpUnix()
+	// log.Println(conf.SnapUp&SecondSnapUp == SecondSnapUp, now, secondTime, now.Unix(), secondTime)
+	if conf.SnapUp&SecondSnapUp == SecondSnapUp && now.Unix() == secondTime-30 {
 		log.Println("===== 8点半抢购开始 =====")
 		return true
 	}
@@ -196,15 +205,19 @@ func timeTrigger() bool {
 }
 
 func SnapUpOnce() {
-	go task.AllCheck()
+	for i := 0; i < baseConcurrencySize; i++ {
+		go task.AllCheck()
 
-	go task.GetCart()
+		go task.GetCart()
 
-	go task.GetMultiReserveTime()
+		go task.GetMultiReserveTime()
 
-	go task.CheckOrder()
+		go task.CheckOrder()
+	}
 
-	go task.AddNewOrder()
+	for i := 0; i < submitConcurrencySize; i++ {
+		go task.AddNewOrder()
+	}
 
 	timer := time.NewTimer(time.Minute * 3)
 	<-timer.C

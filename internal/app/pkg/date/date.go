@@ -28,9 +28,17 @@ func Today() string {
 	return time.Now().Format(CommonDay)
 }
 
-func Unix(hour, min int) int64 {
+func TodayUnix(hour, min, sec int) int64 {
 	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day(), hour, min, 0, 0, time.Local).Unix()
+	return time.Date(now.Year(), now.Month(), now.Day(), hour, min, sec, 0, time.Local).Unix()
+}
+
+func FirstSnapUpUnix() int64 {
+	return TodayUnix(6, 0, 0)
+}
+
+func SecondSnapUpUnix() int64 {
+	return TodayUnix(8, 30, 0)
 }
 
 func FirstSnapUpTime() time.Time {
