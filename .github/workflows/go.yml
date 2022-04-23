@@ -69,12 +69,15 @@ jobs:
           mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong_linux_amd64 && chmod +x release/dingdong_linux_amd64
           mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong_linux_arm64 && chmod +x release/dingdong_linux_arm64
 
+          cp $GITHUB_WORKSPACE/sign.js release/sign.js
+          cp $GITHUB_WORKSPACE/config.example.json release/config.json
+          
           cd release
-          zip -q -r dingdong_windows_amd64.zip dingdong_windows_amd64.exe
-          tar -zcvf dingdong_darwin_amd64.tar.gz dingdong_darwin_amd64
-          tar -zcvf dingdong_darwin_arm64.tar.gz dingdong_darwin_arm64
-          tar -zcvf dingdong_linux_amd64.tar.gz dingdong_linux_amd64
-          tar -zcvf dingdong_linux_arm64.tar.gz dingdong_linux_arm64
+          zip -q -r dingdong_windows_amd64.zip dingdong_windows_amd64.exe sign.js config.json
+          tar -zcvf dingdong_darwin_amd64.tar.gz dingdong_darwin_amd64 sign.js config.json
+          tar -zcvf dingdong_darwin_arm64.tar.gz dingdong_darwin_arm64 sign.js config.json
+          tar -zcvf dingdong_linux_amd64.tar.gz dingdong_linux_amd64 sign.js config.json
+          tar -zcvf dingdong_linux_arm64.tar.gz dingdong_linux_arm64 sign.js config.json
 
       - name: Release
         uses: softprops/action-gh-release@v1

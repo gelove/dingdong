@@ -5,6 +5,7 @@
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
 
 ### iphone (请在闲时可购买时抓包)
+
 1. iphone上通过App Store安装Stream
 2. 打开叮咚买菜微信小程序和Stream, Stream点击"开始抓包"
 3. 回到叮咚买菜微信小程序, 商品加入购物车并结算提交(无需付款)使得小程序发起网络请求
@@ -82,6 +83,10 @@ make build OS=windows # windows
 ```
 
 ## 执行程序
+
+**将 config.example.json 重命名为 config.json**
+
+**确保与程序同一目录中包含 sign.js 和 config.json**
 
 ### macOS
 

@@ -1,4 +1,5 @@
 {
+  "addr": ":9999",
   "snap_up": 1,
   "pick_up_needed": false,
   "monitor_needed": true,
