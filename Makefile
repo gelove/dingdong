@@ -1,4 +1,4 @@
-.PHONY: start generate build compress test pack
+.PHONY: start generate build compress build-upx test pack
 
 # 当前年月日时分秒
 NOW = $(shell date '+%Y%m%d%H%M%S')
@@ -38,7 +38,7 @@ build:
 compress:
 	upx ${RELEASE_APP}
 
-.PHONY build-upx: generate build compress
+build-upx: generate build compress
 
 start:
 	go run -race ${MAIN}
@@ -46,6 +46,6 @@ start:
 test:
 	go test -v ./...
 
-pack: build
+pack: build-upx
 	cp -r config.json sign.js $(RELEASE_OS)
 	cd $(RELEASE_DIR) && zip -r ${APP}-${OS}-${ARCH}-$(NOW).zip ${OS}-${ARCH}

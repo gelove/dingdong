@@ -136,6 +136,12 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func validParams(r *http.Request) bool {
+	if r.Form.Get("base_concurrency") != "" {
+		return true
+	}
+	if r.Form.Get("submit_concurrency") != "" {
+		return true
+	}
 	if r.Form.Get("snap_up") != "" {
 		return true
 	}
@@ -143,6 +149,12 @@ func validParams(r *http.Request) bool {
 		return true
 	}
 	if r.Form.Get("monitor_needed") != "" {
+		return true
+	}
+	if r.Form.Get("monitor_interval_min") != "" {
+		return true
+	}
+	if r.Form.Get("monitor_interval_max") != "" {
 		return true
 	}
 	if r.Form.Get("notify_needed") != "" {
