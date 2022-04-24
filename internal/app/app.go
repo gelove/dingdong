@@ -41,9 +41,9 @@ func isPeak() bool {
 
 // Monitor 监视器 每8-15秒调用一次接口
 func Monitor() {
-	conf := config.Get()
 	cartMap := service.MockCartMap()
 	for {
+		conf := config.Get()
 		if conf.MonitorNeeded {
 			if isPeak() {
 				log.Println("当前高峰期或暂未营业")
