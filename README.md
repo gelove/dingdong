@@ -21,7 +21,7 @@
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
 
-[Charles 抓包教程(Mac)](https://www.jianshu.com/p/ff85b3dac157)
+[Charles 抓包教程(MacOS, Windows)](https://www.jianshu.com/p/ff85b3dac157)
 
 ![微信群](https://github.com/gelove/dingdong/blob/main/assets/wechat.jpeg)
 
