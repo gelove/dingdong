@@ -29,7 +29,7 @@
 
 ![微信群](https://github.com/gelove/dingdong/blob/main/assets/wechat.jpeg)
 
-QQ群: 60768433 (golang & rust & blockchain & flutter 交流学习)
+QQ群: 60768433 (golang & rust & flutter & 区块链 交流学习)
 
 ### 配置文件 config.json 设置
 
