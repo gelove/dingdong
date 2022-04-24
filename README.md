@@ -6,6 +6,10 @@
 
 **抢菜已失效, 捡漏下单和监听可配送时段仍可用**
 
+## 下载安装
+
+从 [Github Release](https://github.com/gelove/dingdong/releases) 下载对应系统的最新版本
+
 ## 抢菜
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
