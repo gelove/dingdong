@@ -10,7 +10,7 @@
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
 
-### iphone (请在闲时可购买时抓包)
+### iphone
 
 1. iphone上通过App Store安装Stream
 2. 打开叮咚买菜微信小程序和Stream, Stream点击"开始抓包"
