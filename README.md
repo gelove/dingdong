@@ -2,6 +2,10 @@
 
 [![dingdong-release](https://github.com/gelove/dingdong/actions/workflows/go.yml/badge.svg)](https://github.com/gelove/dingdong/actions/workflows/go.yml)
 
+## 4月24日
+
+**抢菜已失效, 捡漏下单和监听可配送时段仍可用**
+
 ## 抢菜
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置

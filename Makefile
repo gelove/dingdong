@@ -1,4 +1,4 @@
-.PHONY: start build generate test pack
+.PHONY: start generate build compress test pack
 
 # 当前年月日时分秒
 NOW = $(shell date '+%Y%m%d%H%M%S')
@@ -15,13 +15,13 @@ ARCH ?= amd64
 # ${OS:windows=} 表示将变量中的字符串windows替换为空, 如果此时OS值为windows则表达式返回false
 EXT = $(if ${OS:windows=},,.exe)
 # 目录名作为应用名称
-APP = ${DIR}
+APP = dingdong
 # 可执行文件名称
 APP_EXE = ${APP}${EXT}
-MAIN = ./cmd/${DIR}
+MAIN = ./cmd/${APP}
 CONFIG = config.json
 RELEASE_DIR = release
-RELEASE_OS = ${RELEASE_DIR}/${OS}
+RELEASE_OS = ${RELEASE_DIR}/${OS}-${ARCH}
 RELEASE_APP = ${RELEASE_OS}/${APP_EXE}
 
 all: start
@@ -32,10 +32,15 @@ all: start
 generate:
 	go generate ./...
 
-build: generate
-	GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN} && upx ./${RELEASE_APP}
+build:
+	GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN}
 
-start: generate
+compress:
+	upx ${RELEASE_APP}
+
+.PHONY build-upx: generate build compress
+
+start:
 	go run -race ${MAIN}
 
 test:
@@ -43,4 +48,4 @@ test:
 
 pack: build
 	cp -r config.json sign.js $(RELEASE_OS)
-	cd $(RELEASE_DIR) && zip -r ${APP}-${OS}-$(NOW).zip ${OS}
+	cd $(RELEASE_DIR) && zip -r ${APP}-${OS}-${ARCH}-$(NOW).zip ${OS}-${ARCH}
