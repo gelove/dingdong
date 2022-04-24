@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	FirstSnapUp uint8 = iota + 1
+	FirstSnapUp = iota + 1
 	SecondSnapUp
 )
 

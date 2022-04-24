@@ -30,20 +30,20 @@ func Run() {
 
 func isPeak() bool {
 	now := time.Now()
-	if now.Hour() >= 0 && now.Hour() < 8 {
+	if now.Hour() >= 0 && now.Hour() < 9 {
 		return true
 	}
-	if now.Hour() == 8 && now.Minute() < 50 {
-		return true
-	}
+	// if now.Hour() == 8 && now.Minute() < 50 {
+	// 	return true
+	// }
 	return false
 }
 
 // Monitor 监视器 每8-15秒调用一次接口
 func Monitor() {
+	conf := config.Get()
 	cartMap := service.MockCartMap()
 	for {
-		conf := config.Get()
 		if conf.MonitorNeeded {
 			if isPeak() {
 				log.Println("当前高峰期或暂未营业")
@@ -51,7 +51,7 @@ func Monitor() {
 				service.GetMultiReserveTimeAndNotify(cartMap)
 			}
 		}
-		duration := 8 + rand.Intn(8)
+		duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
 		<-time.After(time.Duration(duration) * time.Second)
 	}
 }
