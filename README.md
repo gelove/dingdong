@@ -81,11 +81,25 @@ GET 请求 localhost:9999/set
 
 ![effect](https://github.com/gelove/dingdong/blob/main/assets/effect.jpeg)
 
-### 当有可配送时段时, 发送通知到手机(只支持 ios)
+### 当有可配送时段时, 发送通知到手机
 
-### 注意事项
+### 安卓手机接收通知
 
-#### 1.安装 bark 得到自己的 barkID, 并将其写入配置文件中
+#### 微信上关注 "pushplus 推送加" 公众号
+
+![PushPlus](https://github.com/gelove/dingdong/blob/main/assets/PushPlus.jpeg)
+
+#### 点击 <kbd>激活消息</kbd>, 并回复 "激活消息", 等待激活成功
+
+#### 点击 <kbd>功能</kbd>, 在按钮列表中点击 <kbd>个人中心</kbd>
+
+#### 点击 <kbd>开发设置</kbd>, 点击 <kbd>Token</kbd> 并一键复制
+
+#### 粘贴Token到配置文件的 "an_users" 中
+
+### 苹果手机接收通知
+
+#### 1.安装 bark 得到自己的 barkID, 并将其粘贴到配置文件的 "users" 中
 
 ![user](https://github.com/gelove/dingdong/blob/main/assets/user.jpeg)
 
