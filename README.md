@@ -2,9 +2,9 @@
 
 [![dingdong-release](https://github.com/gelove/dingdong/actions/workflows/go.yml/badge.svg)](https://github.com/gelove/dingdong/actions/workflows/go.yml)
 
-## 4月24日
+## 4月25日
 
-**抢菜已失效, 捡漏下单和监听可配送时段仍可用**
+**最好用一个账号抢菜, 另一个账号捡漏下单和监听配送时段**
 
 ## 下载安装
 
