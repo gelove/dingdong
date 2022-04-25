@@ -42,16 +42,28 @@ func isPeak() bool {
 // Monitor 监视器 每8-15秒调用一次接口
 func Monitor() {
 	cartMap := service.MockCartMap()
+	executedCount := 0
 	for {
 		conf := config.Get()
-		if conf.MonitorNeeded {
-			if isPeak() {
-				log.Println("当前高峰期或暂未营业")
-			} else {
-				service.GetMultiReserveTimeAndNotify(cartMap)
-			}
-		}
 		duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
+		if !conf.MonitorNeeded {
+			<-time.After(time.Duration(duration) * time.Second)
+			continue
+		}
+		if isPeak() {
+			log.Println("当前高峰期或暂未营业")
+			<-time.After(time.Duration(duration) * time.Second)
+			continue
+		}
+		if executedCount >= 60 {
+			// 执行60次后休息10分钟
+			<-time.After(10 * time.Minute)
+			executedCount = 0
+			continue
+		}
+		executedCount++
+		cartMap = service.MockCartMap()
+		service.GetMultiReserveTimeAndNotify(cartMap)
 		<-time.After(time.Duration(duration) * time.Second)
 	}
 }
