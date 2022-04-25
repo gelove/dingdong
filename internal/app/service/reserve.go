@@ -78,8 +78,9 @@ func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes,
 	if len(validTimes) == 0 {
 		return nil, errs.New(code.NoReserveTimeAndRetry)
 	}
-	log.Println("发现可用的配送时段, 请尽快下单!")
-	return validTimes[0], nil
+	validTime := validTimes[0]
+	log.Printf("发现可用的配送时段[%s-%s], 请尽快下单!(%d-%d)", validTime.StartTime, validTime.EndTime, validTime.StartTimestamp, validTime.EndTimestamp)
+	return validTime, nil
 }
 
 func filterValidTimes(times []*reserve_time.GoTimes) []*reserve_time.GoTimes {

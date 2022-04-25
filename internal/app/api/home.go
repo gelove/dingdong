@@ -72,6 +72,14 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		}
 		conf.SnapUp = snapUp
 	}
+	if r.Form.Get("advance_time") != "" {
+		advanceTime, err := strconv.Atoi(r.Form.Get("advance_time"))
+		if err != nil {
+			_, _ = io.WriteString(w, err.Error())
+			return
+		}
+		conf.AdvanceTime = int64(advanceTime)
+	}
 	if r.Form.Get("pick_up_needed") != "" {
 		pickUpNeeded := r.Form.Get("pick_up_needed")
 		conf.PickUpNeeded = pickUpNeeded != "0"
@@ -143,6 +151,9 @@ func validParams(r *http.Request) bool {
 		return true
 	}
 	if r.Form.Get("snap_up") != "" {
+		return true
+	}
+	if r.Form.Get("advance_time") != "" {
 		return true
 	}
 	if r.Form.Get("pick_up_needed") != "" {

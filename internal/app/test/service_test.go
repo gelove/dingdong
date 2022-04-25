@@ -63,6 +63,12 @@ func TestGetMultiReserveTime(t *testing.T) {
 	}
 }
 
+func TestMockMultiReserveTime(t *testing.T) {
+	task := service.NewTask()
+	task.MockMultiReserveTime()
+	t.Log(task.ReserveTime())
+}
+
 func TestCheckOrder(t *testing.T) {
 	reserveTimes := &reserve_time.GoTimes{}
 	cartMap, err := service.GetCart()

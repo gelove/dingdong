@@ -15,6 +15,7 @@ type Config struct {
 	BaseConcurrency    int               `json:"base_concurrency"`     // 基础并发数(除了提交订单的其他请求, 默认为1)
 	SubmitConcurrency  int               `json:"submit_concurrency"`   // 提交订单并发数(默认为2)
 	SnapUp             int               `json:"snap_up"`              // 抢购开关 0: 关 1: 6点抢 2: 8点半抢 3: 6点和8点半都抢
+	AdvanceTime        int64             `json:"advance_time"`         // 抢购提前进入时间
 	PickUpNeeded       bool              `json:"pick_up_needed"`       // 闲时捡漏开关
 	MonitorNeeded      bool              `json:"monitor_needed"`       // 监视器开关 监视是否有可配送时段
 	MonitorIntervalMin int               `json:"monitor_interval_min"` // 监视器调用接口的最小时间间隔 单位: 秒

@@ -3,10 +3,11 @@
   "base_concurrency": 1,
   "submit_concurrency": 2,
   "snap_up": 1,
+  "advance_time": 15,
   "pick_up_needed": true,
   "monitor_needed": true,
-  "monitor_interval_min": 10,
-  "monitor_interval_max": 20,
+  "monitor_interval_min": 25,
+  "monitor_interval_max": 35,
   "notify_needed": true,
   "notify_interval": 5,
   "headers": {

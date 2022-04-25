@@ -36,13 +36,14 @@ QQ群: 60768433 (golang & rust & flutter & 区块链 交流学习)
 ```js
 base_concurrency // 除了提交订单的其他请求并发数 默认为1
 submit_concurrency // 最后提交订单的并发数 默认为2
-snap_up; // 抢购 0关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
-pick_up_needed; // 闲时捡漏开关 false关闭 true打开 在抢购高峰期之外的时间捡漏 使用时需同时打开监视器
-monitor_needed; // 监视器开关 监视是否有可配送时段
-monitor_interval_min // 监视器调用接口的最小时间间隔 单位: 秒 默认为10 (防止接口调用过于频繁, 被叮咚风控)
-monitor_interval_max // 监视器调用接口的最大时间间隔 单位: 秒 默认为20
-notify_needed; // 通知开关 发现有可配送时段时通知大家有可购商品 使用时需同时打开监视器
-notify_interval; // 通知间隔 单位: 分钟
+snap_up // 抢购 0关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
+advance_time // 抢购提前进入时间 单位:秒 默认为15
+pick_up_needed // 闲时捡漏开关 false关闭 true打开 在抢购高峰期之外的时间捡漏 使用时需同时打开监视器
+monitor_needed // 监视器开关 监视是否有可配送时段
+monitor_interval_min // 监视器调用接口的最小时间间隔 单位:秒 默认为25 (防止接口调用过于频繁, 被叮咚风控)
+monitor_interval_max // 监视器调用接口的最大时间间隔 单位:秒 默认为35
+notify_needed // 通知开关 发现有可配送时段时通知大家有可购商品 使用时需同时打开监视器
+notify_interval // 通知间隔 单位: 分钟
 ```
 
 #### 通过接口修改配置文件
@@ -51,19 +52,20 @@ GET 请求 localhost:9999/set
 
 浏览器中打开 <http://localhost:9999/set?monitor_needed=1&monitor_interval_min=10&monitor_interval_max=20> , 并设置想要修改的参数
 
-| 参数                   | 说明        |               参数                |
-|:---------------------|:----------|:-------------------------------:|
-| base_concurrency     | 基础并发数     |      除了提交订单的其他请求并发数, 默认为1       |
-| submit_concurrency   | 提交并发数     |        最后提交订单的并发数, 默认为2         |
-| snap_up              | 抢购模式      | 0 关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢 |
-| pick_up_needed       | 捡漏开关      |            0 关闭 1 打开            |
-| monitor_needed       | 监视开关      |            0 关闭 1 打开            |
-| monitor_interval_min | 监视的最小时间间隔 |      监视器调用接口的最小时间间隔 单位: 秒       |
-| monitor_interval_max | 监视的最大时间间隔 |      监视器调用接口的最大时间间隔 单位: 秒       |
-| notify_needed        | 通知开关      |            0 关闭 1 打开            |
-| notify_interval      | 通知间隔      |            数字 单位: 分钟            |
-| an_users             | 通知用户(安卓)  |       安卓使用 PushPlus 推送通知        |
-| users                | 通知用户(苹果)  |         苹果使用 Bark 推送通知          |
+| 参数                   | 说明          |                参数                 |
+|:---------------------|:------------|:---------------------------------:|
+| base_concurrency     | 基础并发数       |       除了提交订单的其他请求并发数, 默认为1        |
+| submit_concurrency   | 提交并发数       |         最后提交订单的并发数, 默认为2          |
+| snap_up              | 抢购模式        |  0 关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢  |
+| advance_time         | 抢购提前时间      | 提前一段时间执行一些预备任务(如获取购物车) 单位:秒 默认为15 |
+| pick_up_needed       | 捡漏开关        |             0 关闭 1 打开             |
+| monitor_needed       | 监视开关        |             0 关闭 1 打开             |
+| monitor_interval_min | 监视的最小时间间隔   |       监视器调用接口的最小时间间隔 单位: 秒        |
+| monitor_interval_max | 监视的最大时间间隔   |       监视器调用接口的最大时间间隔 单位: 秒        |
+| notify_needed        | 通知开关        |             0 关闭 1 打开             |
+| notify_interval      | 通知间隔        |             数字 单位: 分钟             |
+| an_users             | 通知用户(安卓)    |        安卓使用 PushPlus 推送通知         |
+| users                | 通知用户(苹果)    |          苹果使用 Bark 推送通知           |
 
 **例子**
 | api | 说明 |

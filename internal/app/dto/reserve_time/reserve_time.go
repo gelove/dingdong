@@ -37,8 +37,8 @@ type GoTimes struct {
 	ArrivalTime    bool   `json:"arrival_time"`
 	Type           int    `json:"type"`
 	DisableType    int    `json:"disableType"`
-	StartTimestamp int    `json:"start_timestamp"`
-	EndTimestamp   int    `json:"end_timestamp"`
+	StartTimestamp int64  `json:"start_timestamp"`
+	EndTimestamp   int64  `json:"end_timestamp"`
 	DisableMsg     string `json:"disableMsg"`
 	StartTime      string `json:"start_time"`
 	EndTime        string `json:"end_time"`

@@ -33,13 +33,10 @@ func isPeak() bool {
 	if now.Hour() >= 0 && now.Hour() < 9 {
 		return true
 	}
-	// if now.Hour() == 8 && now.Minute() < 50 {
-	// 	return true
-	// }
 	return false
 }
 
-// Monitor 监视器 每8-15秒调用一次接口
+// Monitor 监视器 监听运力
 func Monitor() {
 	cartMap := service.MockCartMap()
 	executedCount := 0
@@ -53,12 +50,6 @@ func Monitor() {
 		if isPeak() {
 			log.Println("当前高峰期或暂未营业")
 			<-time.After(time.Duration(duration) * time.Second)
-			continue
-		}
-		if executedCount >= 60 {
-			// 执行60次后休息10分钟
-			<-time.After(10 * time.Minute)
-			executedCount = 0
 			continue
 		}
 		executedCount++
