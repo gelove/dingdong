@@ -231,8 +231,15 @@ func (t *Task) AddNewOrder() {
 		detail := "已成功下单, 请尽快完成支付"
 		log.Println(detail)
 		conf := config.Get()
-		notify.Push(conf.Users[0], detail)
-		notify.PlayMp3()
+		if conf.NotifyNeeded && len(conf.Users) > 0 {
+			notify.Push(conf.Users[0], detail)
+		}
+		if conf.NotifyNeeded && len(conf.AndroidUsers) > 0 {
+			notify.PushToAndroid(conf.AndroidUsers[0], detail)
+		}
+		if conf.AudioNeeded {
+			notify.PlayMp3()
+		}
 		return
 	}
 }

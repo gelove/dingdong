@@ -66,26 +66,31 @@ jobs:
           mkdir -p release/dingdong_darwin_amd64
           mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong_darwin_amd64/dingdong && chmod +x release/dingdong_darwin_amd64/dingdong
           cp $GITHUB_WORKSPACE/sign.js release/dingdong_darwin_amd64/sign.js
+          cp $GITHUB_WORKSPACE/audio.mp3 release/dingdong_darwin_amd64/audio.mp3
           cp $GITHUB_WORKSPACE/config.example.json release/dingdong_darwin_amd64/config.json
           
           mkdir -p release/dingdong_darwin_arm64
           mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong_darwin_arm64/dingdong && chmod +x release/dingdong_darwin_arm64/dingdong
           cp $GITHUB_WORKSPACE/sign.js release/dingdong_darwin_arm64/sign.js
+          cp $GITHUB_WORKSPACE/audio.mp3 release/dingdong_darwin_arm64/audio.mp3
           cp $GITHUB_WORKSPACE/config.example.json release/dingdong_darwin_arm64/config.json
           
           mkdir -p release/dingdong_linux_amd64
           mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong_linux_amd64/dingdong && chmod +x release/dingdong_linux_amd64/dingdong
           cp $GITHUB_WORKSPACE/sign.js release/dingdong_linux_amd64/sign.js
+          cp $GITHUB_WORKSPACE/audio.mp3 release/dingdong_linux_amd64/audio.mp3
           cp $GITHUB_WORKSPACE/config.example.json release/dingdong_linux_amd64/config.json
           
           mkdir -p release/dingdong_linux_arm64
           mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong_linux_arm64/dingdong && chmod +x release/dingdong_linux_arm64/dingdong
           cp $GITHUB_WORKSPACE/sign.js release/dingdong_linux_arm64/sign.js
+          cp $GITHUB_WORKSPACE/audio.mp3 release/dingdong_linux_arm64/audio.mp3
           cp $GITHUB_WORKSPACE/config.example.json release/dingdong_linux_arm64/config.json
           
           mkdir -p release/dingdong_windows_amd64
           mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong_windows_amd64/dingdong.exe
           cp $GITHUB_WORKSPACE/sign.js release/dingdong_windows_amd64/sign.js
+          cp $GITHUB_WORKSPACE/audio.mp3 release/dingdong_windows_amd64/audio.mp3
           cp $GITHUB_WORKSPACE/config.example.json release/dingdong_windows_amd64/config.json
 
           cd release

@@ -47,5 +47,5 @@ test:
 	go test -v ./...
 
 pack: build-upx
-	cp -r config.json sign.js $(RELEASE_OS)
+	cp -r config.json sign.js audio.mp3 $(RELEASE_OS)
 	cd $(RELEASE_DIR) && zip -r ${APP}-${OS}-${ARCH}-$(NOW).zip ${OS}-${ARCH}

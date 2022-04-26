@@ -23,7 +23,7 @@ func TestPushToAndroid(t *testing.T) {
 }
 
 func TestPlayMp3(t *testing.T) {
-	p := player.New("../../../assets/order_success.mp3")
+	p := player.New("../../../audio.mp3")
 	err := p.Send()
 	if err != nil {
 		t.Error(err)

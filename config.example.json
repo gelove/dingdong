@@ -6,10 +6,11 @@
   "advance_time": 15,
   "pick_up_needed": true,
   "monitor_needed": true,
+  "monitor_success_wait": 10,
   "monitor_interval_min": 25,
   "monitor_interval_max": 35,
   "notify_needed": true,
-  "notify_interval": 10,
+  "audio_needed": true,
   "headers": {
     "cookie": "DDXQSESSID=",
     "ddmc-device-id": "",

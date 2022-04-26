@@ -88,6 +88,14 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		monitorNeeded := r.Form.Get("monitor_needed")
 		conf.MonitorNeeded = monitorNeeded != "0"
 	}
+	if r.Form.Get("monitor_success_wait") != "" {
+		monitorSuccessWait, err := strconv.Atoi(r.Form.Get("monitor_success_wait"))
+		if err != nil {
+			_, _ = io.WriteString(w, err.Error())
+			return
+		}
+		conf.MonitorSuccessWait = monitorSuccessWait
+	}
 	if r.Form.Get("monitor_interval_min") != "" {
 		monitorIntervalMin, err := strconv.Atoi(r.Form.Get("monitor_interval_min"))
 		if err != nil {
@@ -112,13 +120,9 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		notifyNeeded := r.Form.Get("notify_needed")
 		conf.NotifyNeeded = notifyNeeded != "0"
 	}
-	if r.Form.Get("monitor_success_wait") != "" {
-		monitorSuccessWait, err := strconv.Atoi(r.Form.Get("monitor_success_wait"))
-		if err != nil {
-			_, _ = io.WriteString(w, err.Error())
-			return
-		}
-		conf.MonitorSuccessWait = monitorSuccessWait
+	if r.Form.Get("audio_needed") != "" {
+		audioNeeded := r.Form.Get("audio_needed")
+		conf.AudioNeeded = audioNeeded != "0"
 	}
 	if r.Form.Get("users") != "" {
 		list := strings.Split(r.Form.Get("users"), ",")
@@ -174,10 +178,13 @@ func validParams(r *http.Request) bool {
 	if r.Form.Get("notify_needed") != "" {
 		return true
 	}
-	if r.Form.Get("an_users") != "" {
+	if r.Form.Get("audio_needed") != "" {
 		return true
 	}
 	if r.Form.Get("users") != "" {
+		return true
+	}
+	if r.Form.Get("an_users") != "" {
 		return true
 	}
 	return false

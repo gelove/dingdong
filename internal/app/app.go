@@ -9,12 +9,9 @@ import (
 	"dingdong/internal/app/api"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/service"
-	"dingdong/internal/app/service/notify"
 )
 
 func Run() {
-	notify.PlayMp3()
-
 	go Monitor()
 	go service.SnapUp()
 	go service.PickUp()

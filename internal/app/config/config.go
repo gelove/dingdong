@@ -22,6 +22,7 @@ type Config struct {
 	MonitorIntervalMin int               `json:"monitor_interval_min"` // 监视器调用接口的最小时间间隔 单位:秒
 	MonitorIntervalMax int               `json:"monitor_interval_max"` // 监视器调用接口的最大时间间隔 单位:秒
 	NotifyNeeded       bool              `json:"notify_needed"`        // 通知开关 发现有可配送时段时通知大家有可购商品
+	AudioNeeded        bool              `json:"audio_needed"`         // 播放音频开关 在下单成功后播放音频
 	Users              []string          `json:"users"`                // bark 用户
 	AndroidUsers       []string          `json:"an_users"`             // android 用户
 	Headers            map[string]string `json:"headers"`              // 请求头

@@ -24,7 +24,7 @@ func New(path string) notify.Notifier {
 }
 
 func Default() notify.Notifier {
-	return New("./assets/order_success.mp3")
+	return New("./audio.mp3")
 }
 
 func (p *Player) Name() string {
