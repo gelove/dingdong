@@ -20,9 +20,6 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
-      - name: upx
-        run: upx -V
-
       # Cache go build cache, used to speedup go test
       - name: Setup Golang caches
         uses: actions/cache@v3
@@ -34,25 +31,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-golang-
 
-      - name: Setup Golang with cache
-        uses: magnetikonline/action-golang-cache@v2
-        with:
-          go-version: ${{ matrix.go_version }}
-
       - name: Mod download
         run: go mod tidy
 
       - run: mkdir -p build
 
       - name: Build with xgo
-        uses: TianTianBigWang/ghaction-xgo@master
+        uses: crazy-max/ghaction-xgo@v1
         with:
-          xgo_version: v0.1
+          xgo_version: latest
           go_version: ${{ matrix.go_version }}
-          pkg: cmd/dingdong
           dest: build
+          pkg: cmd/dingdong
           prefix: dingdong
-          targets: windows/amd64,darwin/amd64,darwin/arm64,linux/amd64,linux/arm64
+          targets: darwin/amd64,darwin/arm64,linux/amd64,linux/arm64,windows/amd64
           v: true
           x: false
           race: false
@@ -61,41 +53,43 @@ jobs:
 
       - name: Move
         run: |
-          ls ./build
+          pwd
+          echo $GITHUB_WORKSPACE
+          ls -al $GITHUB_WORKSPACE/build
           
-          mkdir -p release/dingdong_darwin_amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong_darwin_amd64/dingdong && chmod +x release/dingdong_darwin_amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong_darwin_amd64/config.json
+          mkdir -p release/dingdong-darwin-amd64
+          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong-darwin-amd64/dingdong && chmod +x release/dingdong-darwin-amd64/dingdong
+          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-darwin-amd64/config.json
           
-          mkdir -p release/dingdong_darwin_arm64
-          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong_darwin_arm64/dingdong && chmod +x release/dingdong_darwin_arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong_darwin_arm64/config.json
+          mkdir -p release/dingdong-darwin-arm64
+          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong-darwin-arm64/dingdong && chmod +x release/dingdong-darwin-arm64/dingdong
+          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-darwin-arm64/config.json
           
-          mkdir -p release/dingdong_linux_amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong_linux_amd64/dingdong && chmod +x release/dingdong_linux_amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong_linux_amd64/config.json
+          mkdir -p release/dingdong-linux-amd64
+          mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong-linux-amd64/dingdong && chmod +x release/dingdong-linux-amd64/dingdong
+          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-linux-amd64/config.json
           
-          mkdir -p release/dingdong_linux_arm64
-          mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong_linux_arm64/dingdong && chmod +x release/dingdong_linux_arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong_linux_arm64/config.json
+          mkdir -p release/dingdong-linux-arm64
+          mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong-linux-arm64/dingdong && chmod +x release/dingdong-linux-arm64/dingdong
+          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-linux-arm64/config.json
           
-          mkdir -p release/dingdong_windows_amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong_windows_amd64/dingdong.exe
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong_windows_amd64/config.json
+          mkdir -p release/dingdong-windows-amd64
+          mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong-windows-amd64/dingdong.exe
+          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-windows-amd64/config.json
 
           cd release
-          tar -zcvf dingdong_darwin_amd64.tar.gz dingdong_darwin_amd64
-          tar -zcvf dingdong_darwin_arm64.tar.gz dingdong_darwin_arm64
-          tar -zcvf dingdong_linux_amd64.tar.gz dingdong_linux_amd64
-          tar -zcvf dingdong_linux_arm64.tar.gz dingdong_linux_arm64
-          zip -q -r dingdong_windows_amd64.zip dingdong_windows_amd64
+          tar -zcvf dingdong-darwin-amd64.tar.gz dingdong-darwin-amd64
+          tar -zcvf dingdong-darwin-arm64.tar.gz dingdong-darwin-arm64
+          tar -zcvf dingdong-linux-amd64.tar.gz dingdong-linux-amd64
+          tar -zcvf dingdong-linux-arm64.tar.gz dingdong-linux-arm64
+          zip -q -r dingdong-windows-amd64.zip dingdong-windows-amd64
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release/dingdong_darwin_amd64.tar.gz
-            release/dingdong_darwin_arm64.tar.gz
-            release/dingdong_linux_amd64.tar.gz
-            release/dingdong_linux_arm64.tar.gz
-            release/dingdong_windows_amd64.zip
+            release/dingdong-darwin-amd64.tar.gz
+            release/dingdong-darwin-arm64.tar.gz
+            release/dingdong-linux-amd64.tar.gz
+            release/dingdong-linux-arm64.tar.gz
+            release/dingdong-windows-amd64.zip
