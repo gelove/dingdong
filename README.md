@@ -35,7 +35,7 @@ QQ群: 60768433 (golang & rust & flutter & 区块链 交流学习)
 
 ```js
 base_concurrency // 除了提交订单的其他请求并发数 默认为1
-submit_concurrency // 最后提交订单的并发数 默认为2
+submit_concurrency // 最后提交订单的并发数 默认为1
 snap_up // 抢购 0关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
 advance_time // 抢购提前进入时间 单位:秒 默认为15
 pick_up_needed // 闲时捡漏开关 false关闭 true打开 在抢购高峰期之外的时间捡漏 使用时需同时打开监听器

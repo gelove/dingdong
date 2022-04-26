@@ -7,6 +7,7 @@ import (
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/pkg/json"
 )
 
 func GetHomeFlowDetail() ([]flow_detail.Item, error) {
@@ -33,7 +34,7 @@ func GetHomeFlowDetail() ([]flow_detail.Item, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, result.Msg)
+		return nil, errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 	return result.Data.List, nil
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -34,6 +35,8 @@ var (
 
 type Task struct {
 	sync.RWMutex
+	timeOut       context.Context
+	Finished      context.CancelFunc
 	completed     bool
 	reserveTime   *reserve_time.GoTimes
 	cartMap       map[string]interface{}
@@ -41,7 +44,8 @@ type Task struct {
 }
 
 func NewTask() *Task {
-	return &Task{}
+	timeOut, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	return &Task{timeOut: timeOut, Finished: cancel}
 }
 
 func (t *Task) Completed() bool {
@@ -103,63 +107,76 @@ func (t *Task) SetCheckOrderMap(checkOrderMap map[string]interface{}) *Task {
 }
 
 // AllCheck 不一定需要, 只起补充作用
-func (t *Task) AllCheck() {
+func (t *Task) AllCheck(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
-		if t.Completed() {
+		select {
+		case <-t.timeOut.Done():
+			log.Println("AllCheck finished")
 			return
-		}
-		err := AllCheck()
-		if err != nil {
-			log.Println(err)
-			duration := durationMinMillis + rand.Intn(durationGapMillis)
-			<-time.After(time.Duration(duration) * time.Millisecond)
-		}
-		return
-	}
-}
-
-func (t *Task) GetCart() {
-	for {
-		if t.Completed() {
-			return
-		}
-		duration := durationMinMillis + rand.Intn(durationGapMillis)
-		cartMap, err := GetCart()
-		if err != nil {
-			log.Println(err)
-			if e, ok := err.(errs.Error); ok {
-				if e.Code() == code.NoValidProduct {
-					return
-				}
+		default:
+			err := AllCheck()
+			if err != nil {
+				log.Println(err)
+				duration := durationMinMillis + rand.Intn(durationGapMillis)
+				<-time.After(time.Duration(duration) * time.Millisecond)
+				continue
 			}
-			<-time.After(time.Duration(duration) * time.Millisecond)
-			continue
+			<-time.After(time.Second * 5)
 		}
-		t.SetCartMap(cartMap)
-		<-time.After(time.Duration(duration) * time.Millisecond)
-		continue
 	}
 }
 
-func (t *Task) GetMultiReserveTime() {
+func (t *Task) GetCart(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
-		if t.Completed() {
+		select {
+		case <-t.timeOut.Done():
+			log.Println("GetCart finished")
 			return
+		default:
+			duration := durationMinMillis + rand.Intn(durationGapMillis)
+			cartMap, err := GetCart()
+			if err != nil {
+				log.Println(err)
+				if e, ok := err.(errs.Error); ok {
+					if e.CodeEqual(code.NoValidProduct) {
+						return
+					}
+				}
+				<-time.After(time.Duration(duration) * time.Millisecond)
+				continue
+			}
+			t.SetCartMap(cartMap)
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
-		if t.CartMap() == nil {
-			<-time.After(10 * time.Millisecond)
-			continue
-		}
-		reserveTime, err := GetMultiReserveTime(t.CartMap())
-		if err != nil {
-			log.Println(err)
-		} else {
+	}
+}
+
+func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		select {
+		case <-t.timeOut.Done():
+			log.Println("GetMultiReserveTime finished")
+			return
+		default:
+			if t.CartMap() == nil {
+				<-time.After(10 * time.Millisecond)
+				continue
+			}
+			duration := durationMinMillis + rand.Intn(durationGapMillis)
+			reserveTime, err := GetMultiReserveTime(t.CartMap())
+			if err != nil {
+				log.Println(err)
+				<-time.After(time.Duration(duration) * time.Millisecond)
+				continue
+			}
 			t.SetReserveTime(reserveTime)
 			log.Println("===== 有效配送时段已更新 =====")
 			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
-		duration := durationMinMillis + rand.Intn(durationGapMillis)
-		<-time.After(time.Duration(duration) * time.Millisecond)
 	}
 }
 
@@ -190,57 +207,65 @@ func (t *Task) MockMultiReserveTime() {
 	t.SetReserveTime(reserveTime)
 }
 
-func (t *Task) CheckOrder() {
+func (t *Task) CheckOrder(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
-		if t.Completed() {
+		select {
+		case <-t.timeOut.Done():
+			log.Println("CheckOrder finished")
 			return
-		}
-		if t.CartMap() == nil || t.ReserveTime() == nil {
-			<-time.After(10 * time.Millisecond)
-			continue
-		}
-		checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
-		if err != nil {
-			log.Println(err)
-		} else {
+		default:
+			if t.CartMap() == nil || t.ReserveTime() == nil {
+				<-time.After(10 * time.Millisecond)
+				continue
+			}
+			duration := durationMinMillis + rand.Intn(durationGapMillis)
+			checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
+			if err != nil {
+				log.Println(err)
+				<-time.After(time.Duration(duration) * time.Millisecond)
+				continue
+			}
 			t.SetCheckOrderMap(checkOrderMap)
 			log.Println("===== 订单信息已更新 =====")
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
-		duration := durationMinMillis + rand.Intn(durationGapMillis)
-		<-time.After(time.Duration(duration) * time.Millisecond)
 	}
 }
 
-func (t *Task) AddNewOrder() {
+func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
-		if t.Completed() {
+		select {
+		case <-t.timeOut.Done():
+			log.Println("AddNewOrder finished")
 			return
+		default:
+			if t.CartMap() == nil || t.ReserveTime() == nil || t.CheckOrderMap() == nil {
+				<-time.After(10 * time.Millisecond)
+				continue
+			}
+			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
+			if err != nil {
+				log.Println(err)
+				duration := 50 + rand.Intn(50)
+				<-time.After(time.Duration(duration) * time.Millisecond)
+				continue
+			}
+			detail := "已成功下单, 请尽快完成支付"
+			log.Println(detail)
+			conf := config.Get()
+			if conf.NotifyNeeded && len(conf.Users) > 0 {
+				go notify.Push(conf.Users[0], detail)
+			}
+			if conf.NotifyNeeded && len(conf.AndroidUsers) > 0 {
+				go notify.PushToAndroid(conf.AndroidUsers[0], detail)
+			}
+			if conf.AudioNeeded {
+				go notify.PlayMp3()
+			}
+			t.Finished()
 		}
-		if t.CartMap() == nil || t.ReserveTime() == nil || t.CheckOrderMap() == nil {
-			<-time.After(10 * time.Millisecond)
-			continue
-		}
-		err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
-		if err != nil {
-			log.Println(err)
-			duration := 50 + rand.Intn(50)
-			<-time.After(time.Duration(duration) * time.Millisecond)
-			continue
-		}
-		t.SetCompleted(true)
-		detail := "已成功下单, 请尽快完成支付"
-		log.Println(detail)
-		conf := config.Get()
-		if conf.NotifyNeeded && len(conf.Users) > 0 {
-			notify.Push(conf.Users[0], detail)
-		}
-		if conf.NotifyNeeded && len(conf.AndroidUsers) > 0 {
-			notify.PushToAndroid(conf.AndroidUsers[0], detail)
-		}
-		if conf.AudioNeeded {
-			notify.PlayMp3()
-		}
-		return
 	}
 }
 
@@ -264,25 +289,32 @@ func timeTrigger() bool {
 
 func SnapUpOnce() {
 	conf := config.Get()
+	wg := new(sync.WaitGroup)
 	task := NewTask()
+	defer task.Finished()
 	task.MockMultiReserveTime() // 模拟配送时段
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
-		go task.AllCheck()
+		wg.Add(1)
+		go task.AllCheck(wg)
+	}
 
-		go task.GetCart()
+	for i := 0; i < conf.BaseConcurrency; i++ {
+		wg.Add(1)
+		go task.GetCart(wg)
+	}
 
-		// go task.GetMultiReserveTime()
-
-		go task.CheckOrder()
+	for i := 0; i < conf.BaseConcurrency; i++ {
+		wg.Add(1)
+		go task.CheckOrder(wg)
 	}
 
 	for i := 0; i < conf.SubmitConcurrency; i++ {
-		go task.AddNewOrder()
+		wg.Add(1)
+		go task.AddNewOrder(wg)
 	}
 
-	timer := time.NewTimer(time.Minute * 2)
-	<-timer.C
+	wg.Wait()
 }
 
 // SnapUp 抢购

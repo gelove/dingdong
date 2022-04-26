@@ -10,5 +10,6 @@ const jsFile = "../../../sign.js"
 
 func init() {
 	config.Initialize(configFile)
-	session.InitializeMock(jsFile)
+	session.Initialize(jsFile)
+	// session.InitializeMock(jsFile)
 }

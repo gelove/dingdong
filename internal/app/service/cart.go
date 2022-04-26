@@ -8,6 +8,7 @@ import (
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/pkg/json"
 )
 
 func AllCheck() error {
@@ -32,7 +33,7 @@ func AllCheck() error {
 		return errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return errs.WithMessage(code.InvalidResponse, result.Msg)
+		return errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 	log.Println("勾选购物车全选按钮成功")
 	return nil
@@ -61,7 +62,7 @@ func GetCart() (map[string]interface{}, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, result.Msg)
+		return nil, errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 
 	data, ok := result.Data.(map[string]interface{})

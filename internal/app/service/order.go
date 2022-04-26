@@ -82,7 +82,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, result.Msg)
+		return nil, errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 	body, err := resp.ToBytes()
 	if err != nil {
@@ -187,7 +187,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		return errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return errs.WithMessage(code.InvalidResponse, result.Msg)
+		return errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 	log.Println("恭喜你，已成功下单 =>", resp.String())
 	return nil

@@ -1,4 +1,4 @@
-package test
+package common
 
 import (
 	"testing"
@@ -67,5 +67,5 @@ func TestJsonEncode(t *testing.T) {
     }`
 	out := make(map[string]interface{})
 	json.MustDecodeFromString(str, &out)
-	t.Log(json.MustEncodeToString(out))
+	t.Log(json.MustEncodePrettyString(out))
 }

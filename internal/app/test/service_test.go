@@ -1,7 +1,6 @@
 package test
 
 import (
-	"log"
 	"testing"
 
 	_ "dingdong/internal/app/config"
@@ -33,7 +32,7 @@ func TestGetHomeFlowDetail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(list)
+	t.Log(json.MustEncodePrettyString(list))
 }
 
 func TestGetAddress(t *testing.T) {
@@ -77,6 +76,7 @@ func TestGetMultiReserveTime(t *testing.T) {
 
 func TestMockMultiReserveTime(t *testing.T) {
 	task := service.NewTask()
+	defer task.Finished()
 	task.MockMultiReserveTime()
 	t.Log(task.ReserveTime())
 }
@@ -115,61 +115,4 @@ func TestAddNewOrder(t *testing.T) {
 
 func TestSnapUpOnce(t *testing.T) {
 	service.SnapUpOnce()
-}
-
-// TestRunOnce 此为单次执行模式 用于在非高峰期测试下单 也必须满足3个前提条件 1.有收货地址 2.购物车有商品 3.有配送时间段
-func TestRunOnce(t *testing.T) {
-	addressId := session.Address().Id
-	if addressId == "" {
-		t.Error("address_id is empty")
-		return
-	}
-
-	log.Println("===== 获取有效的商品 =====")
-	err := service.AllCheck()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	cartMap, err := service.GetCart()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if len(cartMap) == 0 {
-		t.Error("cart is empty")
-		return
-	}
-
-	log.Println("===== 获取有效的配送时段 =====")
-	reserveTime, err := service.GetMultiReserveTime(cartMap)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if reserveTime == nil {
-		t.Error("reserveTime is empty")
-		return
-	}
-
-	log.Println("===== 生成订单信息 =====")
-	checkOrderMap, err := service.CheckOrder(cartMap, reserveTime)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if len(checkOrderMap) == 0 {
-		t.Error("checkOrderMap is empty")
-		return
-	}
-	log.Println("订单总金额 =>", checkOrderMap["price"])
-
-	log.Println("===== 提交订单 =====")
-	err = service.AddNewOrder(cartMap, reserveTime, checkOrderMap)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Log("提交订单成功")
 }

@@ -1,4 +1,4 @@
-package test
+package common
 
 import (
 	"testing"
@@ -7,6 +7,10 @@ import (
 	"dingdong/internal/app/service/notify"
 	"dingdong/pkg/notify/player"
 )
+
+func init() {
+	config.Initialize("../../../../config.json")
+}
 
 func TestPush(t *testing.T) {
 	conf := config.Get()
@@ -23,7 +27,7 @@ func TestPushToAndroid(t *testing.T) {
 }
 
 func TestPlayMp3(t *testing.T) {
-	p := player.New("../../../audio.mp3")
+	p := player.New("../../../../audio.mp3")
 	err := p.Send()
 	if err != nil {
 		t.Error(err)

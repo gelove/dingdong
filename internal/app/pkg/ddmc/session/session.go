@@ -56,8 +56,8 @@ func Initialize(jsFile string) {
 
 func InitializeMock(jsFile string) {
 	once.Do(func() {
-		client := req.DevMode().EnableForceHTTP1()
-		// client := req.C().EnableForceHTTP1()
+		// client := req.DevMode().EnableForceHTTP1()
+		client := req.C().EnableForceHTTP1()
 
 		s = &session{
 			Client: client,

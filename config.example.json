@@ -1,8 +1,8 @@
 {
   "addr": ":9999",
   "base_concurrency": 1,
-  "submit_concurrency": 2,
-  "snap_up": 1,
+  "submit_concurrency": 1,
+  "snap_up": 3,
   "advance_time": 15,
   "pick_up_needed": true,
   "monitor_needed": true,
@@ -24,7 +24,7 @@
     ""
   ],
   "users": [
-    "",
+    "https://api.day.app/999eqeqeqeqeqqe",
     ""
   ]
 }
