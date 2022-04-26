@@ -4,24 +4,28 @@ import (
 	"log"
 	"testing"
 
-	"dingdong/internal/app/config"
 	_ "dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
+	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/service"
+	"dingdong/pkg/js"
+	"dingdong/pkg/json"
 )
 
-func TestPush(t *testing.T) {
-	conf := config.Get()
-	if len(conf.Users) > 0 {
-		service.Push(conf.Users[0], "测试")
+func TestJsCall(t *testing.T) {
+	headers := session.GetHeaders()
+	headers["accept-language"] = "en-us"
+	params := session.GetParams(headers)
+	params["tab_type"] = "1"
+	params["page"] = "1"
+	res, err := js.Call(jsFile, "sign", json.MustEncodeToString(params))
+	if err != nil {
+		t.Error("js parser error =>", err)
+		return
 	}
-}
-
-func TestPushToAndroid(t *testing.T) {
-	conf := config.Get()
-	if len(conf.AndroidUsers) > 0 {
-		service.PushToAndroid(conf.AndroidUsers[0], "测试")
-	}
+	// nars 对应就可以
+	// sesi 可以不用管, 依赖 nars 与 一个随机字符串, 每次计算应都不同, 但是在JS虚拟机中伪随机数似乎不变, 每次都会得到同一个值
+	t.Log("value =>", res.String())
 }
 
 func TestGetHomeFlowDetail(t *testing.T) {
@@ -33,11 +37,19 @@ func TestGetHomeFlowDetail(t *testing.T) {
 }
 
 func TestGetAddress(t *testing.T) {
-	list, err := service.GetAddress()
+	list, err := session.GetAddress()
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(list)
+}
+
+func TestGetUser(t *testing.T) {
+	user, err := session.GetUser()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(user)
 }
 
 func TestAllCheck(t *testing.T) {
@@ -107,8 +119,7 @@ func TestSnapUpOnce(t *testing.T) {
 
 // TestRunOnce 此为单次执行模式 用于在非高峰期测试下单 也必须满足3个前提条件 1.有收货地址 2.购物车有商品 3.有配送时间段
 func TestRunOnce(t *testing.T) {
-	conf := config.Get()
-	addressId := conf.Params["address_id"]
+	addressId := session.Address().Id
 	if addressId == "" {
 		t.Error("address_id is empty")
 		return

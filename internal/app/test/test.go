@@ -9,11 +9,6 @@ const configFile = "../../../config.json"
 const jsFile = "../../../sign.js"
 
 func init() {
-	// dir, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println(dir)
 	config.Initialize(configFile)
-	session.Initialize(jsFile)
+	session.InitializeMock(jsFile)
 }

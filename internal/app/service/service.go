@@ -13,6 +13,7 @@ import (
 	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/internal/app/service/notify"
 )
 
 const (
@@ -32,7 +33,8 @@ var (
 )
 
 type Task struct {
-	Completed     bool
+	sync.RWMutex
+	completed     bool
 	reserveTime   *reserve_time.GoTimes
 	cartMap       map[string]interface{}
 	checkOrderMap map[string]interface{}
@@ -42,11 +44,28 @@ func NewTask() *Task {
 	return &Task{}
 }
 
+func (t *Task) Completed() bool {
+	t.RLock()
+	defer t.RUnlock()
+	return t.completed
+}
+
+func (t *Task) SetCompleted(completed bool) *Task {
+	t.Lock()
+	defer t.Unlock()
+	t.completed = completed
+	return t
+}
+
 func (t *Task) ReserveTime() *reserve_time.GoTimes {
+	t.RLock()
+	defer t.RUnlock()
 	return t.reserveTime
 }
 
 func (t *Task) SetReserveTime(reserveTime *reserve_time.GoTimes) *Task {
+	t.Lock()
+	defer t.Unlock()
 	if reserveTime != nil {
 		t.reserveTime = reserveTime
 	}
@@ -54,10 +73,14 @@ func (t *Task) SetReserveTime(reserveTime *reserve_time.GoTimes) *Task {
 }
 
 func (t *Task) CartMap() map[string]interface{} {
+	t.RLock()
+	defer t.RUnlock()
 	return t.cartMap
 }
 
 func (t *Task) SetCartMap(cartMap map[string]interface{}) *Task {
+	t.Lock()
+	defer t.Unlock()
 	if cartMap != nil {
 		t.cartMap = cartMap
 	}
@@ -65,10 +88,14 @@ func (t *Task) SetCartMap(cartMap map[string]interface{}) *Task {
 }
 
 func (t *Task) CheckOrderMap() map[string]interface{} {
+	t.RLock()
+	defer t.RUnlock()
 	return t.checkOrderMap
 }
 
 func (t *Task) SetCheckOrderMap(checkOrderMap map[string]interface{}) *Task {
+	t.Lock()
+	defer t.Unlock()
 	if checkOrderMap != nil {
 		t.checkOrderMap = checkOrderMap
 	}
@@ -78,7 +105,7 @@ func (t *Task) SetCheckOrderMap(checkOrderMap map[string]interface{}) *Task {
 // AllCheck 不一定需要, 只起补充作用
 func (t *Task) AllCheck() {
 	for {
-		if t.Completed {
+		if t.Completed() {
 			return
 		}
 		err := AllCheck()
@@ -93,7 +120,7 @@ func (t *Task) AllCheck() {
 
 func (t *Task) GetCart() {
 	for {
-		if t.Completed {
+		if t.Completed() {
 			return
 		}
 		duration := durationMinMillis + rand.Intn(durationGapMillis)
@@ -116,7 +143,7 @@ func (t *Task) GetCart() {
 
 func (t *Task) GetMultiReserveTime() {
 	for {
-		if t.Completed {
+		if t.Completed() {
 			return
 		}
 		if t.CartMap() == nil {
@@ -155,8 +182,7 @@ func (t *Task) MockMultiReserveTime() {
 	}
 	var fiveMinutes int64 = 5 * 60
 	if now > halfPastTwoPM-fiveMinutes {
-		reserveTime.StartTimestamp = now + fiveMinutes
-		// reserveTime.StartTimestamp = (now/fiveMinutes + 1) * fiveMinutes
+		reserveTime.StartTimestamp = now + fiveMinutes // 叮咚是在当前时间直接加5分钟
 	} else {
 		reserveTime.StartTimestamp = halfPastTwoPM
 	}
@@ -166,7 +192,7 @@ func (t *Task) MockMultiReserveTime() {
 
 func (t *Task) CheckOrder() {
 	for {
-		if t.Completed {
+		if t.Completed() {
 			return
 		}
 		if t.CartMap() == nil || t.ReserveTime() == nil {
@@ -187,7 +213,7 @@ func (t *Task) CheckOrder() {
 
 func (t *Task) AddNewOrder() {
 	for {
-		if t.Completed {
+		if t.Completed() {
 			return
 		}
 		if t.CartMap() == nil || t.ReserveTime() == nil || t.CheckOrderMap() == nil {
@@ -201,11 +227,12 @@ func (t *Task) AddNewOrder() {
 			<-time.After(time.Duration(duration) * time.Millisecond)
 			continue
 		}
-		t.Completed = true
+		t.SetCompleted(true)
 		detail := "已成功下单, 请尽快完成支付"
 		log.Println(detail)
 		conf := config.Get()
-		Push(conf.Users[0], detail)
+		notify.Push(conf.Users[0], detail)
+		notify.PlayMp3()
 		return
 	}
 }
@@ -272,7 +299,7 @@ func PickUp() {
 	}
 }
 
-func GetMultiReserveTimeAndNotify(cartMap map[string]interface{}) {
+func MonitorAndPickUp(cartMap map[string]interface{}) {
 	_, err := GetMultiReserveTime(cartMap)
 	if err != nil {
 		log.Println(err)
@@ -288,19 +315,13 @@ func GetMultiReserveTimeAndNotify(cartMap map[string]interface{}) {
 		notifyCh <- struct{}{}
 	}
 
-	<-time.After(10 * time.Minute)
+	<-time.After(time.Duration(conf.MonitorSuccessWait) * time.Minute)
 }
 
 func Notify() {
 	for {
 		<-notifyCh
-		now := time.Now()
 		conf := config.Get()
-		// interval := time.Duration(conf.NotifyInterval) * time.Minute
-		// if now.Before(lastNotify.Add(interval)) {
-		// 	continue
-		// }
-		lastNotify = now
 		list, err := GetHomeFlowDetail()
 		if err != nil {
 			log.Printf("获取首页产品失败 => %+v", err)
@@ -330,7 +351,7 @@ func Notify() {
 			wg.Add(1)
 			go func(token string) {
 				defer wg.Done()
-				Push(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+				notify.Push(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 			}(v)
 		}
 		for _, v := range conf.AndroidUsers {
@@ -340,7 +361,7 @@ func Notify() {
 			wg.Add(1)
 			go func(token string) {
 				defer wg.Done()
-				PushToAndroid(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+				notify.PushToAndroid(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 			}(v)
 		}
 		wg.Wait()

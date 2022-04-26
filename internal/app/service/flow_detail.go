@@ -10,7 +10,7 @@ import (
 )
 
 func GetHomeFlowDetail() ([]flow_detail.Item, error) {
-	url := "https://maicai.api.ddxq.mobi/homeApi/homeFlowDetail"
+	api := "https://maicai.api.ddxq.mobi/homeApi/homeFlowDetail"
 
 	headers := session.GetHeaders()
 	headers["accept-language"] = "en-us"
@@ -28,7 +28,7 @@ func GetHomeFlowDetail() ([]flow_detail.Item, error) {
 		SetQueryParams(query).
 		SetResult(&result).
 		SetRetryCount(10).
-		Send(http.MethodGet, url)
+		Send(http.MethodGet, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}

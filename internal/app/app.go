@@ -9,9 +9,12 @@ import (
 	"dingdong/internal/app/api"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/service"
+	"dingdong/internal/app/service/notify"
 )
 
 func Run() {
+	notify.PlayMp3()
+
 	go Monitor()
 	go service.SnapUp()
 	go service.PickUp()
@@ -39,11 +42,10 @@ func isPeak() bool {
 // Monitor 监视器 监听运力
 func Monitor() {
 	cartMap := service.MockCartMap()
-	executedCount := 0
 	for {
 		conf := config.Get()
 		duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
-		if !conf.MonitorNeeded {
+		if !conf.MonitorNeeded && !conf.PickUpNeeded {
 			<-time.After(time.Duration(duration) * time.Second)
 			continue
 		}
@@ -52,9 +54,7 @@ func Monitor() {
 			<-time.After(time.Duration(duration) * time.Second)
 			continue
 		}
-		executedCount++
-		cartMap = service.MockCartMap()
-		service.GetMultiReserveTimeAndNotify(cartMap)
+		service.MonitorAndPickUp(cartMap)
 		<-time.After(time.Duration(duration) * time.Second)
 	}
 }

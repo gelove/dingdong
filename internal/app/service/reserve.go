@@ -3,17 +3,13 @@ package service
 import (
 	"log"
 	"net/http"
-	"time"
 
-	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/json"
 )
-
-var lastNotify time.Time
 
 func MockCartMap() map[string]interface{} {
 	first := make(map[string]interface{})
@@ -33,20 +29,19 @@ func MockCartMap() map[string]interface{} {
 }
 
 func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes, error) {
-	url := "https://maicai.api.ddxq.mobi/order/getMultiReserveTime"
+	api := "https://maicai.api.ddxq.mobi/order/getMultiReserveTime"
 
 	products := cartMap["products"].([]map[string]interface{})
 	productsList := [][]map[string]interface{}{products}
 	productsJson := json.MustEncodeToString(productsList)
 
-	conf := config.Get()
 	headers := session.GetHeaders()
 	// 响应压缩有乱码 暂不压缩
 	// headers["accept-encoding"] = "gzip, deflate, br"
 	params := session.GetParams(headers)
 	params["group_config_id"] = ""
 	params["isBridge"] = "false"
-	params["address_id"] = conf.Params["address_id"]
+	params["address_id"] = session.Address().Id
 	params["products"] = productsJson
 
 	form, err := session.Sign(params)
@@ -60,14 +55,14 @@ func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes,
 		SetFormData(form).
 		SetResult(&result).
 		// SetRetryCount(50).
-		Send(http.MethodPost, url)
+		Send(http.MethodPost, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	// log.Println("resp =>", resp.String())
 	// log.Println("result =>", json.MustEncodeToString(result))
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, result.Msg)
+		return nil, errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
 	}
 	if len(result.Data) == 0 || len(result.Data[0].Times) == 0 || len(result.Data[0].Times[0].Times) == 0 {
 		return nil, errs.New(code.NoReserveTime)

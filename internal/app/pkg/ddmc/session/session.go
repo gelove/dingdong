@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -9,11 +10,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/imroc/req/v3"
 
 	"dingdong/internal/app/config"
+	"dingdong/internal/app/dto/address"
+	"dingdong/internal/app/pkg/errs"
+	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/js"
 	"dingdong/pkg/json"
+	"dingdong/pkg/textual"
 )
 
 var (
@@ -22,24 +28,52 @@ var (
 )
 
 type session struct {
-	Client *req.Client
-	JsFile string // js文件路径
+	UserID  string
+	JsFile  string // js文件路径
+	Client  *req.Client
+	Address address.Item
 }
 
 func Initialize(jsFile string) {
 	once.Do(func() {
 		// client := req.DevMode().EnableForceHTTP1()
-		client := req.C().EnableForceHTTP1()
 		// client := req.C().EnableForceHTTP1()
-		// 	SetCommonRetryCondition(retryCondition).
-		// 	SetCommonRetryInterval(retryInterval).
-		// 	SetCommonRetryHook(retryHook).
-		// 	SetCommonRetryBackoffInterval(1*time.Millisecond, 10*time.Millisecond)
+		client := req.C().EnableForceHTTP1().
+			SetCommonRetryCondition(retryCondition).
+			SetCommonRetryInterval(retryInterval).
+			SetCommonRetryHook(retryHook).
+			SetCommonRetryBackoffInterval(1*time.Millisecond, 10*time.Millisecond)
 
 		s = &session{
 			Client: client,
 			JsFile: jsFile,
 		}
+
+		setUserID()
+		chooseAddr()
+	})
+}
+
+func InitializeMock(jsFile string) {
+	once.Do(func() {
+		client := req.DevMode().EnableForceHTTP1()
+		// client := req.C().EnableForceHTTP1()
+
+		s = &session{
+			Client: client,
+			JsFile: jsFile,
+		}
+
+		conf := config.Get()
+		s.UserID = conf.Mock["ddmc-uid"]
+		s.Address = address.Item{
+			Id:         conf.Mock["address_id"],
+			CityNumber: conf.Mock["ddmc-city-number"],
+			StationId:  conf.Mock["ddmc-station-id"],
+		}
+		longitude, _ := strconv.ParseFloat(conf.Mock["ddmc-longitude"], 64)
+		latitude, _ := strconv.ParseFloat(conf.Mock["ddmc-latitude"], 64)
+		s.Address.Location.Location = []float64{longitude, latitude}
 	})
 }
 
@@ -61,7 +95,9 @@ func retryInterval(resp *req.Response, attempt int) time.Duration {
 }
 
 func retryHook(resp *req.Response, err error) {
-	log.Println("Request error =>", err.Error())
+	if err != nil {
+		log.Println("Request error =>", err.Error())
+	}
 	r := resp.Request.RawRequest
 	log.Println("Retry request =>", r.Method, r.URL)
 }
@@ -72,6 +108,50 @@ func Client() *req.Client {
 
 func JsFile() string {
 	return s.JsFile
+}
+
+func Address() address.Item {
+	return s.Address
+}
+
+func setUserID() {
+	user, err := GetUser()
+	if err != nil {
+		panic(err)
+	}
+	s.UserID = user.ID
+}
+
+func chooseAddr() {
+	addrList, err := GetAddress()
+	if err != nil {
+		panic(err)
+	}
+	if len(addrList) == 1 {
+		s.Address = addrList[0]
+		log.Println(json.MustEncodePrettyString(s.Address))
+		log.Printf("默认收货地址: %s %s %s", s.Address.Location.Address, s.Address.Location.Name, s.Address.AddrDetail)
+		return
+	}
+
+	options := make([]string, 0, len(addrList))
+	for _, v := range addrList {
+		options = append(options, fmt.Sprintf("%s %s %s", v.Location.Address, v.Location.Name, v.AddrDetail))
+	}
+
+	var addr string
+	sv := &survey.Select{
+		Message: "请选择收货地址",
+		Options: options,
+	}
+	if err := survey.AskOne(sv, &addr); err != nil {
+		panic(errs.Wrap(code.SelectAddressFailed, err))
+	}
+
+	index := textual.IndexOf(addr, options)
+	s.Address = addrList[index]
+	log.Printf("已选择收货地址: %s %s %s", s.Address.Location.Address, s.Address.Location.Name, s.Address.AddrDetail)
+	return
 }
 
 // GetHeaders 抓包后参考项目中的image/headers.jpeg 把信息一行一行copy到下面 没有的key不需要复制
@@ -87,16 +167,16 @@ func GetHeaders() map[string]string {
 	headers["ddmc-os-version"] = "[object Undefined]"
 	headers["ddmc-time"] = strconv.Itoa(int(time.Now().Unix()))
 	headers["referer"] = "https://servicewechat.com/wx1e113254eda17715/430/page-frame.html"
+	headers["ddmc-city-number"] = s.Address.CityNumber // 城市id
+	headers["ddmc-longitude"] = strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64)
+	headers["ddmc-latitude"] = strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64)
+	headers["ddmc-station-id"] = s.Address.StationId // 发货站点id
+	headers["ddmc-uid"] = s.UserID                   // 用户id
 
 	h := config.Get().Headers
 	headers["cookie"] = h["cookie"]
-	headers["ddmc-city-number"] = h["ddmc-city-number"] // 城市id
-	headers["ddmc-device-id"] = h["ddmc-device-id"]     // 设备id
-	headers["ddmc-latitude"] = h["ddmc-latitude"]       // 纬度
-	headers["ddmc-longitude"] = h["ddmc-longitude"]     // 经度
-	headers["ddmc-station-id"] = h["ddmc-station-id"]   // 发货站点id
-	headers["ddmc-uid"] = h["ddmc-uid"]                 // 用户id
 	headers["user-agent"] = h["user-agent"]
+	headers["ddmc-device-id"] = h["ddmc-device-id"] // 设备id
 	return headers
 }
 

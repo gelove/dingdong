@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"sync"
 
-	"dingdong/internal/app/pkg/ddmc/session"
+	"github.com/imroc/req/v3"
+
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/json"
@@ -16,39 +17,36 @@ const URL = "http://www.pushplus.plus/send"
 
 var cache sync.Map
 
-type data struct {
+type pusher struct {
 	Token   string `json:"token"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
 
-type pusher struct {
-	token string
-}
-
-func New(token string) notify.Notifier {
+func New(token, title, content string) notify.Notifier {
 	if v, ok := cache.Load(token); ok {
-		return v.(notify.Notifier)
+		instance := v.(*pusher)
+		if instance.Title != title {
+			instance.Title = title
+		}
+		if instance.Content != content {
+			instance.Content = content
+		}
+		return instance
 	}
-	instance := &pusher{token: token}
+	instance := &pusher{Token: token, Title: title, Content: content}
 	cache.Store(token, instance)
 	return instance
 }
 
-func (b *pusher) Name() string {
+func (b pusher) Name() string {
 	return "PushPlus"
 }
 
-func (b *pusher) Send(title, content string) error {
-	d := &data{
-		Token:   b.token,
-		Title:   title,
-		Content: content,
-	}
-
-	resp, err := session.Client().R().
+func (b pusher) Send() error {
+	resp, err := req.C().R().
 		SetHeader("Content-Type", "application/json; charset=utf-8").
-		SetBody(json.MustEncode(d)).
+		SetBody(json.MustEncode(b)).
 		Send(http.MethodPost, URL)
 	if err != nil {
 		return errs.Wrap(code.RequestFailed, err)

@@ -13,7 +13,6 @@ import (
 	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/textual"
 
-	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
@@ -30,8 +29,7 @@ func filterFields(data map[string]interface{}, fields []string) map[string]inter
 }
 
 func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes) (map[string]interface{}, error) {
-	url := "https://maicai.api.ddxq.mobi/order/checkOrder"
-	conf := config.Get()
+	api := "https://maicai.api.ddxq.mobi/order/checkOrder"
 
 	packages := make(map[string]interface{})
 	for key, val := range cartMap {
@@ -56,7 +54,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
 	params["packages"] = packagesJson
-	params["address_id"] = conf.Params["address_id"]
+	params["address_id"] = session.Address().Id
 	params["user_ticket_id"] = "default"
 	params["freight_ticket_id"] = "default"
 	params["is_use_point"] = "0"
@@ -79,7 +77,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		SetFormData(form).
 		SetResult(&result).
 		// SetRetryCount(50).
-		Send(http.MethodPost, url)
+		Send(http.MethodPost, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
@@ -108,14 +106,13 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 }
 
 func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes, checkOrderMap map[string]interface{}) error {
-	url := "https://maicai.api.ddxq.mobi/order/addNewOrder"
-	conf := config.Get()
+	api := "https://maicai.api.ddxq.mobi/order/addNewOrder"
 
 	paymentOrder := map[string]interface{}{
 		"reserved_time_start":    reserveTime.StartTimestamp,
 		"reserved_time_end":      reserveTime.EndTimestamp,
 		"parent_order_sign":      cartMap["parent_order_sign"],
-		"address_id":             conf.Params["address_id"],
+		"address_id":             session.Address().Id,
 		"pay_type":               6,
 		"product_type":           1,
 		"form_id":                strings.ReplaceAll(uuid.New().String(), "-", ""),
@@ -173,7 +170,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	params["showData"] = "true"
 	params["showMsg"] = "false"
 	params["ab_config"] = `{"key_onion":"C"}`
-	log.Printf("AddNewOrder params => %#v", params)
+	// log.Printf("AddNewOrder params => %#v", params)
 	form, err := session.Sign(params)
 	if err != nil {
 		return errs.Wrap(code.SignFailed, err)
@@ -185,7 +182,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		SetFormData(form).
 		SetResult(&result).
 		// SetRetryCount(50).
-		Send(http.MethodPost, url)
+		Send(http.MethodPost, api)
 	if err != nil {
 		return errs.Wrap(code.RequestFailed, err)
 	}

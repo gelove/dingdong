@@ -11,7 +11,7 @@ import (
 )
 
 func AllCheck() error {
-	url := "https://maicai.api.ddxq.mobi/cart/allCheck"
+	api := "https://maicai.api.ddxq.mobi/cart/allCheck"
 
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
@@ -27,7 +27,7 @@ func AllCheck() error {
 		SetQueryParams(query).
 		SetResult(&result).
 		// SetRetryCount(50).
-		Send(http.MethodGet, url)
+		Send(http.MethodGet, api)
 	if err != nil {
 		return errs.Wrap(code.RequestFailed, err)
 	}
@@ -39,7 +39,7 @@ func AllCheck() error {
 }
 
 func GetCart() (map[string]interface{}, error) {
-	url := "https://maicai.api.ddxq.mobi/cart/index"
+	api := "https://maicai.api.ddxq.mobi/cart/index"
 
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
@@ -56,7 +56,7 @@ func GetCart() (map[string]interface{}, error) {
 		SetQueryParams(query).
 		SetResult(&result).
 		// SetRetryCount(50).
-		Send(http.MethodGet, url)
+		Send(http.MethodGet, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}

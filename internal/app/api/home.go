@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"dingdong/internal/app/config"
-	"dingdong/internal/app/service"
+	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
 
@@ -19,7 +19,7 @@ func SayWelcome(w http.ResponseWriter, _ *http.Request) {
 
 // GetAddress 获取地址
 func GetAddress(w http.ResponseWriter, _ *http.Request) {
-	list, err := service.GetAddress()
+	list, err := session.GetAddress()
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error()+"\n")
 		return
@@ -112,13 +112,13 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		notifyNeeded := r.Form.Get("notify_needed")
 		conf.NotifyNeeded = notifyNeeded != "0"
 	}
-	if r.Form.Get("notify_interval") != "" {
-		interval, err := strconv.Atoi(r.Form.Get("notify_interval"))
+	if r.Form.Get("monitor_success_wait") != "" {
+		monitorSuccessWait, err := strconv.Atoi(r.Form.Get("monitor_success_wait"))
 		if err != nil {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.NotifyInterval = interval
+		conf.MonitorSuccessWait = monitorSuccessWait
 	}
 	if r.Form.Get("users") != "" {
 		list := strings.Split(r.Form.Get("users"), ",")
@@ -162,6 +162,9 @@ func validParams(r *http.Request) bool {
 	if r.Form.Get("monitor_needed") != "" {
 		return true
 	}
+	if r.Form.Get("monitor_success_wait") != "" {
+		return true
+	}
 	if r.Form.Get("monitor_interval_min") != "" {
 		return true
 	}
@@ -171,7 +174,7 @@ func validParams(r *http.Request) bool {
 	if r.Form.Get("notify_needed") != "" {
 		return true
 	}
-	if r.Form.Get("notify_interval") != "" {
+	if r.Form.Get("an_users") != "" {
 		return true
 	}
 	if r.Form.Get("users") != "" {

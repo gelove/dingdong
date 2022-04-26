@@ -33,6 +33,15 @@ func MustEncode(data interface{}) []byte {
 	return bytes
 }
 
+// MustEncodeToString 转为json字符串
+func MustEncodeToString(data interface{}) string {
+	str, err := MarshalToString(data)
+	if err != nil {
+		panic(err)
+	}
+	return str
+}
+
 // MustEncodePretty 编码
 func MustEncodePretty(data interface{}) []byte {
 	bytes, err := MarshalIndent(data, "", "  ")
@@ -42,13 +51,10 @@ func MustEncodePretty(data interface{}) []byte {
 	return bytes
 }
 
-// MustEncodeToString 转为json字符串
-func MustEncodeToString(data interface{}) string {
-	str, err := MarshalToString(data)
-	if err != nil {
-		panic(err)
-	}
-	return str
+// MustEncodePrettyString 编码
+func MustEncodePrettyString(data interface{}) string {
+	bytes := MustEncodePretty(data)
+	return string(bytes)
 }
 
 // MustDecode 解码
