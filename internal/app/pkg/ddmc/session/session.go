@@ -29,12 +29,11 @@ var (
 
 type session struct {
 	UserID  string
-	JsFile  string // js文件路径
 	Client  *req.Client
 	Address address.Item
 }
 
-func Initialize(jsFile string) {
+func Initialize() {
 	once.Do(func() {
 		// client := req.DevMode().EnableForceHTTP1()
 		// client := req.C().EnableForceHTTP1()
@@ -46,7 +45,6 @@ func Initialize(jsFile string) {
 
 		s = &session{
 			Client: client,
-			JsFile: jsFile,
 		}
 
 		setUserID()
@@ -54,14 +52,13 @@ func Initialize(jsFile string) {
 	})
 }
 
-func InitializeMock(jsFile string) {
+func InitializeMock() {
 	once.Do(func() {
 		// client := req.DevMode().EnableForceHTTP1()
 		client := req.C().EnableForceHTTP1()
 
 		s = &session{
 			Client: client,
-			JsFile: jsFile,
 		}
 
 		conf := config.Get()
@@ -104,10 +101,6 @@ func retryHook(resp *req.Response, err error) {
 
 func Client() *req.Client {
 	return s.Client
-}
-
-func JsFile() string {
-	return s.JsFile
 }
 
 func Address() address.Item {
@@ -205,7 +198,7 @@ func GetParams(headers map[string]string) map[string]string {
 }
 
 func Sign(params map[string]string) (map[string]string, error) {
-	res, err := js.Call(JsFile(), "sign", json.MustEncodeToString(params))
+	res, err := js.Call("js/sign.js", "sign", json.MustEncodeToString(params))
 	if err != nil {
 		return nil, err
 	}

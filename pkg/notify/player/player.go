@@ -1,30 +1,30 @@
 package player
 
 import (
-	"os"
 	"time"
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/speaker"
 
+	"dingdong/assets"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/notify"
 )
 
 type Player struct {
-	Path string
+	Audio string
 }
 
-func New(path string) notify.Notifier {
+func New(audioName string) notify.Notifier {
 	return &Player{
-		Path: path,
+		Audio: audioName,
 	}
 }
 
 func Default() notify.Notifier {
-	return New("./audio.mp3")
+	return New("audio/order.mp3")
 }
 
 func (p *Player) Name() string {
@@ -32,7 +32,7 @@ func (p *Player) Name() string {
 }
 
 func (p *Player) Send() error {
-	audioFile, err := os.Open(p.Path)
+	audioFile, err := assets.GetFile(p.Audio)
 	if err != nil {
 		return errs.Wrap(code.Unexpected, err)
 	}

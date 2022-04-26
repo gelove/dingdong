@@ -1,20 +1,34 @@
 package api
 
 import (
-	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"dingdong/assets"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
 
-func SayWelcome(w http.ResponseWriter, _ *http.Request) {
-	_, _ = fmt.Fprintf(w, "Welcome to this website")
+var tmpl *template.Template
+
+func init() {
+	t, err := template.ParseFS(assets.FS, "template/*.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmpl = t
+}
+
+func SayWelcome(w http.ResponseWriter, r *http.Request) {
+	err := tmpl.ExecuteTemplate(w, "index.html", map[string]string{"title": "叮咚抢菜"})
+	if err != nil {
+		_, _ = io.WriteString(w, err.Error()+"\n")
+	}
 }
 
 // GetAddress 获取地址

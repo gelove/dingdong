@@ -1,10 +1,11 @@
 package js
 
 import (
-	"io/ioutil"
 	"sync"
 
 	"github.com/robertkrimen/otto"
+
+	"dingdong/assets"
 )
 
 var cache sync.Map
@@ -14,7 +15,7 @@ func Call(filePath string, functionName string, args ...interface{}) (result ott
 		return call(v.([]byte), functionName, args...)
 	}
 
-	bs, err := ioutil.ReadFile(filePath)
+	bs, err := assets.ReadFile(filePath)
 	if err != nil {
 		return
 	}

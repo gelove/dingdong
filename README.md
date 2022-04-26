@@ -21,13 +21,13 @@
 3. 回到叮咚买菜微信小程序, 商品加入购物车并结算提交(无需付款)使得小程序发起网络请求
 4. 回到Stream停止抓包并查看抓包历史, 点击按域名, 会看到 maicai.api.ddxq.mobi 这个域名下的请求
 
-感谢群友 hhhhg~ 提供的教程 <a href="/assets/windows端小白教程.docx" target="_blank">windows端小白教程.docx</a>
+感谢群友 hhhhg~ 提供的教程 <a href="/assets/doc/windows端小白教程.docx" target="_blank">windows端小白教程.docx</a>
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
 
 [Charles 抓包教程(MacOS, Windows)](https://www.jianshu.com/p/ff85b3dac157)
 
-![微信群](https://github.com/gelove/dingdong/blob/main/assets/wechat.jpeg)
+![微信群](https://github.com/gelove/dingdong/blob/main/assets/image/wechat.jpeg)
 
 QQ群: 60768433 (golang & rust & flutter & 区块链 交流学习)
 
@@ -82,7 +82,7 @@ GET 请求 localhost:9999/set
 
 ## 可配送时段监听
 
-![effect](https://github.com/gelove/dingdong/blob/main/assets/effect.jpeg)
+![effect](https://github.com/gelove/dingdong/blob/main/assets/image/effect.jpeg)
 
 ### 当有可配送时段时, 发送通知到手机
 
@@ -90,7 +90,7 @@ GET 请求 localhost:9999/set
 
 #### 微信上关注 "pushplus 推送加" 公众号
 
-![PushPlus](https://github.com/gelove/dingdong/blob/main/assets/PushPlus.jpeg)
+![PushPlus](https://github.com/gelove/dingdong/blob/main/assets/image/PushPlus.jpeg)
 
 #### 点击 <kbd>激活消息</kbd>, 并回复 "激活消息", 等待激活成功
 
@@ -104,13 +104,13 @@ GET 请求 localhost:9999/set
 
 #### 1.安装 bark 得到自己的 barkID (下图红框中), 并将其粘贴到配置文件的 "users" 中
 
-![user](https://github.com/gelove/dingdong/blob/main/assets/user.jpeg)
+![user](https://github.com/gelove/dingdong/blob/main/assets/image/user.jpeg)
 
 #### 2.配置文件中 users 为一组需要通知的 bark userID
 
 #### 3.bark 需打开允许通知
 
-![notify](https://github.com/gelove/dingdong/blob/main/assets/notify.jpeg)
+![notify](https://github.com/gelove/dingdong/blob/main/assets/image/notify.jpeg)
 
 ## 打包
 
@@ -127,7 +127,7 @@ make build OS=windows # windows
 
 **将 config.example.json 重命名为 config.json**
 
-**确保与程序同一目录中包含 sign.js 和 config.json**
+**确保与程序同一目录中包含 config.json**
 
 ### macOS
 

@@ -16,13 +16,19 @@ func init() {
 }
 
 func main() {
+	defer func() {
+		if v := recover(); v != nil {
+			log.Printf("[严重错误]: 请通知作者 %+v", v)
+		}
+	}()
+
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 	log.Println(dir)
 	config.Initialize(dir + "/config.json")
-	session.Initialize(dir + "/sign.js")
+	session.Initialize()
 
 	app.Run()
 }

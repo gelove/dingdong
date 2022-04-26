@@ -17,7 +17,7 @@ func TestJsCall(t *testing.T) {
 	params := session.GetParams(headers)
 	params["tab_type"] = "1"
 	params["page"] = "1"
-	res, err := js.Call(jsFile, "sign", json.MustEncodeToString(params))
+	res, err := js.Call("js/sign.js", "sign", json.MustEncodeToString(params))
 	if err != nil {
 		t.Error("js parser error =>", err)
 		return

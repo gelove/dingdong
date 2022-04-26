@@ -6,10 +6,9 @@ import (
 )
 
 const configFile = "../../../config.json"
-const jsFile = "../../../sign.js"
 
 func init() {
 	config.Initialize(configFile)
-	session.Initialize(jsFile)
-	// session.InitializeMock(jsFile)
+	// session.Initialize()
+	session.InitializeMock()
 }

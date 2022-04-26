@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"dingdong/assets"
 	"dingdong/internal/app/api"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/service"
@@ -20,6 +21,7 @@ func Run() {
 	http.HandleFunc("/", api.SayWelcome)
 	http.HandleFunc("/set", api.SetConfig)
 	http.HandleFunc("/address", api.GetAddress)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.FS))))
 
 	conf := config.Get()
 	err := http.ListenAndServe(conf.Addr, nil)
