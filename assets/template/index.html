@@ -1,13 +1,120 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{.title}}</title>
-</head>
-<body>
-<div>Welcome to the home page!</div>
-</body>
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <title>叮咚买菜助手0.2</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            #page-content {
+                width: 100%;
+                height: 100%;
+            }
+            
+            #result {
+                font-size: 1.2em;
+                color: red;
+            }
+            
+            }
+        </style>
+        <style type="text/css">
+            #footer {
+                height: 40px;
+                line-height: 40px;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                text-align: center;
+                background: #333;
+                color: #fff;
+                font-family: Arial;
+                font-size: 12px;
+                letter-spacing: 1px;
+            }
+        </style>
+        <script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+    </head>
+    <body>
+        <article id="page-content">
+            <section style="text-align: left">
+                <header>
+                    <h1>买菜开关修改 V0.2</h1>
+                </header>
+                抢购模式：
+                <input type="radio" name="snap_up" value="0" checked="" />关闭
+                <input type="radio" name="snap_up" value="1" />六点抢
+                <input type="radio" name="snap_up" value="2" />八点半抢
+                <input type="radio" name="snap_up" value="3" />都抢
+                <br>
+                捡漏开关：
+                <input type="radio" name="pick_up_needed" value="0" checked="" />关闭
+                <input type="radio" name="pick_up_needed" value="1" />打开
+                <br>
+
+                监听开关：
+                <input type="radio" name="monitor_needed" value="0" checked="" />关闭
+                <input type="radio" name="monitor_needed" value="1" />打开
+
+                <br>
+                <button type="button" id="submit">修改</button>
+                <br><br>
+
+
+                         <textarea id="result" rows="40" cols="100"></textarea>
+
+
+            </section>
+            <br />
+            <br />
+
+            <section style="text-align: center">
+
+                <div id="footer">
+                    CopyRight@qiujianzhong
+                </div>
+
+                <script>
+                    $(document).ready(function() {
+                                var URL = "";
+                                $('#submit').click(function() {
+                                    doSet();
+                                });
+                    
+                            
+                    
+                    
+                            function doSet() {
+                    
+                                $('#result').text("");
+                            
+                            $.ajax({
+                                type: "GET",
+                                url: URL + "/set",
+                                data: {
+                            "snap_up": $('input[name=snap_up]:checked').val(),
+                            "pick_up_needed": $('input[name=pick_up_needed]:checked').val(),
+                            "monitor_needed": $('input[name=monitor_needed]:checked').val(),
+                    
+                                },
+                                success: function(data) {
+                                    $('#result').text(data);
+                    
+                                    if (data.length == 0) {
+                                        data = "设置失败，请稍后再试！";
+                                    }
+                                    else{
+                                        data = data;
+                                    }
+                                    $('#result').text(data);
+ 
+                                },
+                                error: function() {
+                                    $('#result').text("无法连接网络！");
+                                }
+                            });
+                        }
+                    
+                    });
+                </script>
+    </body>
 </html>
