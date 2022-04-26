@@ -25,7 +25,7 @@ func init() {
 }
 
 func SayWelcome(w http.ResponseWriter, r *http.Request) {
-	err := tmpl.ExecuteTemplate(w, "index.html", map[string]string{"title": "叮咚抢菜"})
+	err := tmpl.ExecuteTemplate(w, "index.html", map[string]string{"title": "叮咚买菜助手"})
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error()+"\n")
 	}
