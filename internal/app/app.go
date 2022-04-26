@@ -18,6 +18,8 @@ func Run() {
 	go service.Notify()
 
 	http.HandleFunc("/", api.SayWelcome)
+    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/api/static")))) 
+
 	http.HandleFunc("/set", api.SetConfig)
 	http.HandleFunc("/address", api.GetAddress)
 

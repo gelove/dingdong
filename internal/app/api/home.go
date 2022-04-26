@@ -1,20 +1,22 @@
 package api
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"html/template"
 
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
 
-func SayWelcome(w http.ResponseWriter, _ *http.Request) {
-	_, _ = fmt.Fprintf(w, "Welcome to this website")
+func SayWelcome(w http.ResponseWriter,r *http.Request){ 
+    r.ParseForm() 
+    t,_:=template.ParseFiles("./internal/app/api/index.html") 
+    t.Execute(w,nil)
 }
 
 // GetAddress 获取地址
