@@ -37,7 +37,7 @@ jobs:
       - run: mkdir -p build
 
       - name: Build with xgo
-        uses: crazy-max/ghaction-xgo@v1
+        uses: TianTianBigWang/ghaction-xgo@master
         with:
           xgo_version: v0.1
           go_version: ${{ matrix.go_version }}
@@ -53,7 +53,6 @@ jobs:
 
       - name: Move
         run: |
-          pwd
           echo $GITHUB_WORKSPACE
           ls -al $GITHUB_WORKSPACE/build
           
