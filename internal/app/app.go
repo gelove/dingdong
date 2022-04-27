@@ -18,8 +18,10 @@ func Run() {
 	go service.PickUp()
 	go service.Notify()
 
-	http.HandleFunc("/", api.SayWelcome)
+	http.HandleFunc("/", api.ConfigView)
 	http.HandleFunc("/set", api.SetConfig)
+	http.HandleFunc("/config", api.ConfigView)
+	http.HandleFunc("/notify", api.Notify)
 	http.HandleFunc("/address", api.GetAddress)
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.FS))))
 

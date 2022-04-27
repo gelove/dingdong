@@ -5,6 +5,8 @@ import (
 
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/date"
+	"dingdong/internal/app/pkg/errs"
+	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/json"
 )
 
@@ -24,6 +26,16 @@ func BenchmarkSnapUpTime(b *testing.B) {
 			_ = date.FirstSnapUpUnix()
 		}
 	})
+}
+
+func TestError(t *testing.T) {
+	err := errs.New(code.ReserveTimeIsDisabled)
+	second := errs.New(code.ReserveTimeIsDisabled)
+	if !errs.As(err, &second) {
+		t.Error("error is not equal")
+		return
+	}
+	t.Log("error is equal")
 }
 
 func TestJsonGet(t *testing.T) {

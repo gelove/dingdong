@@ -122,7 +122,9 @@ func (t *Task) AllCheck(wg *sync.WaitGroup) {
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
 			}
-			<-time.After(time.Second * 5)
+			log.Println("===== 购物车全选 =====")
+			// <-time.After(time.Second * 5)
+			return
 		}
 	}
 }
@@ -148,7 +150,8 @@ func (t *Task) GetCart(wg *sync.WaitGroup) {
 				continue
 			}
 			t.SetCartMap(cartMap)
-			<-time.After(time.Duration(duration) * time.Millisecond)
+			// <-time.After(time.Duration(duration) * time.Millisecond)
+			return
 		}
 	}
 }
@@ -175,7 +178,8 @@ func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
 			t.SetReserveTime(reserveTime)
 			log.Println("===== 有效配送时段已更新 =====")
 			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
-			<-time.After(time.Duration(duration) * time.Millisecond)
+			// <-time.After(time.Duration(duration) * time.Millisecond)
+			return
 		}
 	}
 }
@@ -228,7 +232,8 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 			}
 			t.SetCheckOrderMap(checkOrderMap)
 			log.Println("===== 订单信息已更新 =====")
-			<-time.After(time.Duration(duration) * time.Millisecond)
+			// <-time.After(time.Duration(duration) * time.Millisecond)
+			return
 		}
 	}
 }
@@ -247,19 +252,23 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 			}
 			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 			if err != nil {
+				_err := errs.New(code.ReserveTimeIsDisabled)
+				if !errs.As(err, &_err) {
+					return
+				}
 				log.Println(err)
-				duration := 50 + rand.Intn(50)
+				duration := 20 + rand.Intn(80)
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
 			}
 			detail := "已成功下单, 请尽快完成支付"
 			log.Println(detail)
 			conf := config.Get()
-			if conf.NotifyNeeded && len(conf.Users) > 0 {
-				go notify.Push(conf.Users[0], detail)
+			if conf.NotifyNeeded && len(conf.Bark) > 0 {
+				go notify.Push(conf.Bark[0], detail)
 			}
-			if conf.NotifyNeeded && len(conf.AndroidUsers) > 0 {
-				go notify.PushToAndroid(conf.AndroidUsers[0], detail)
+			if conf.NotifyNeeded && len(conf.PushPlus) > 0 {
+				go notify.PushPlus(conf.PushPlus[0], detail)
 			}
 			if conf.AudioNeeded {
 				go notify.PlayMp3()
@@ -383,7 +392,7 @@ func Notify() {
 		}
 		products := strings.Join(productNames, " ")
 		wg := new(sync.WaitGroup)
-		for _, v := range conf.Users {
+		for _, v := range conf.Bark {
 			if v == "" {
 				continue
 			}
@@ -393,14 +402,14 @@ func Notify() {
 				notify.Push(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 			}(v)
 		}
-		for _, v := range conf.AndroidUsers {
+		for _, v := range conf.PushPlus {
 			if v == "" {
 				continue
 			}
 			wg.Add(1)
 			go func(token string) {
 				defer wg.Done()
-				notify.PushToAndroid(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+				notify.PushPlus(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 			}(v)
 		}
 		wg.Wait()

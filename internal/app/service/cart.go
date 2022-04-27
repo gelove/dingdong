@@ -17,6 +17,8 @@ func AllCheck() error {
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
 	params["is_check"] = "1"
+	params["is_load"] = "1"
+	params["ab_config"] = `{"key_onion":"D","key_cart_discount_price":"C"}`
 	query, err := session.Sign(params)
 	if err != nil {
 		return errs.Wrap(code.SignFailed, err)
@@ -33,7 +35,7 @@ func AllCheck() error {
 		return errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
+		return errs.WithMessage(code.InvalidResponse, "购物车全选失败 => "+json.MustEncodeToString(result))
 	}
 	log.Println("勾选购物车全选按钮成功")
 	return nil
@@ -62,7 +64,7 @@ func GetCart() (map[string]interface{}, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.InvalidResponse, "获取购物车失败 => "+json.MustEncodeToString(result))
 	}
 
 	data, ok := result.Data.(map[string]interface{})

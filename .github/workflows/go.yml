@@ -59,23 +59,23 @@ jobs:
           
           mkdir -p release/dingdong-darwin-amd64
           mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong-darwin-amd64/dingdong && chmod +x release/dingdong-darwin-amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-darwin-amd64/config.json
+          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-darwin-amd64/config.yml
           
           mkdir -p release/dingdong-darwin-arm64
           mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong-darwin-arm64/dingdong && chmod +x release/dingdong-darwin-arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-darwin-arm64/config.json
+          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-darwin-arm64/config.yml
           
           mkdir -p release/dingdong-linux-amd64
           mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong-linux-amd64/dingdong && chmod +x release/dingdong-linux-amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-linux-amd64/config.json
+          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-linux-amd64/config.yml
           
           mkdir -p release/dingdong-linux-arm64
           mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong-linux-arm64/dingdong && chmod +x release/dingdong-linux-arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-linux-arm64/config.json
+          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-linux-arm64/config.yml
           
           mkdir -p release/dingdong-windows-amd64
           mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong-windows-amd64/dingdong.exe
-          cp $GITHUB_WORKSPACE/config.example.json release/dingdong-windows-amd64/config.json
+          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-windows-amd64/config.yml
 
           cd release
           tar -zcvf dingdong-darwin-amd64.tar.gz dingdong-darwin-amd64

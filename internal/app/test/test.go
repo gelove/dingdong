@@ -5,7 +5,7 @@ import (
 	"dingdong/internal/app/pkg/ddmc/session"
 )
 
-const configFile = "../../../config.json"
+const configFile = "../../../config.yml"
 
 func init() {
 	config.Initialize(configFile)

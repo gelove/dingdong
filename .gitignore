@@ -7,6 +7,7 @@
 .history
 
 # Project
-config.json
+config.yml
 /release
 /dingdong
+/data

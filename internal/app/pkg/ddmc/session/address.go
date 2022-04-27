@@ -3,51 +3,32 @@ package session
 import (
 	"net/http"
 
-	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/address"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/pkg/json"
 )
 
 func GetAddress() ([]address.Item, error) {
-	url := "https://sunquan.api.ddxq.mobi/api/v1/user/address/"
+	api := "https://sunquan.api.ddxq.mobi/api/v1/user/address/"
 
-	h := config.Get().Headers
-	headers := map[string]string{
-		"Host":   "sunquan.api.ddxq.mobi",
-		"cookie": h["cookie"],
-	}
-
-	params := make(map[string]string)
-	params["channel"] = "applet"
-	params["api_version"] = "9.50.0"
-	params["app_version"] = "2.83.1"
-	params["app_client_id"] = "4"
-	params["uid"] = ""
-	params["applet_source"] = ""
-	params["h5_source"] = ""
-	params["sharer_uid"] = ""
-	params["s_id"] = ""
-	params["openid"] = ""
-	params["device_token"] = ""
-	query, err := Sign(params)
-	if err != nil {
-		return nil, errs.Wrap(code.SignFailed, err)
-	}
+	headers := GetUserHeader()
+	params := GetUserParams(headers)
+	params["source_type"] = "5"
 
 	result := address.Result{}
-	_, err = Client().R().
+	_, err := Client().R().
 		SetHeaders(headers).
-		SetQueryParams(query).
+		SetQueryParams(params).
 		SetResult(&result).
 		SetRetryCount(5).
-		Send(http.MethodGet, url)
+		Send(http.MethodGet, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	// log.Println(resp.String())
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, result.Message)
+		return nil, errs.WithMessage(code.InvalidResponse, "获取地址失败 => "+json.MustEncodeToString(result))
 	}
 	if len(result.Data.Valid) == 0 {
 		return nil, errs.New(code.NoValidAddress)

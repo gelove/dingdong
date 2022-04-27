@@ -9,20 +9,20 @@ import (
 )
 
 func init() {
-	config.Initialize("../../../../config.json")
+	config.Initialize("../../../../config.yml")
 }
 
-func TestPush(t *testing.T) {
+func TestBark(t *testing.T) {
 	conf := config.Get()
-	if len(conf.Users) > 0 {
-		notify.Push(conf.Users[0], "测试")
+	if len(conf.Bark) > 0 {
+		notify.Push(conf.Bark[0], "Bark 测试")
 	}
 }
 
-func TestPushToAndroid(t *testing.T) {
+func TestPushPlus(t *testing.T) {
 	conf := config.Get()
-	if len(conf.AndroidUsers) > 0 {
-		notify.PushToAndroid(conf.AndroidUsers[0], "测试")
+	if len(conf.PushPlus) > 0 {
+		notify.PushPlus(conf.PushPlus[0], "PushPlus 测试")
 	}
 }
 

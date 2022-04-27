@@ -18,6 +18,7 @@ const (
 	NoValidProduct                                // 当前购物车中没有可购商品
 	NoReserveTime                                 // 当前没有可用的配送时段
 	NoReserveTimeAndRetry                         // 当前没有可用的配送时段, 请稍后再试
+	ReserveTimeIsDisabled                         // 您选择的送达时间已经失效了，请重新选择
 )
 
 func (i ErrorCode) Int() int {

@@ -11,7 +11,9 @@ import (
 	"dingdong/assets"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
+	"dingdong/internal/app/service/notify"
 	"dingdong/pkg/json"
+	"dingdong/pkg/yaml"
 )
 
 var tmpl *template.Template
@@ -24,11 +26,28 @@ func init() {
 	tmpl = t
 }
 
-func SayWelcome(w http.ResponseWriter, r *http.Request) {
-	err := tmpl.ExecuteTemplate(w, "index.html", map[string]string{"title": "叮咚买菜助手"})
+func ConfigView(w http.ResponseWriter, r *http.Request) {
+	conf := config.Get()
+	err := tmpl.ExecuteTemplate(w, "index.html", map[string]interface{}{"title": "叮咚买菜助手", "conf": conf})
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error()+"\n")
 	}
+}
+
+// Notify 发送通知测试
+func Notify(w http.ResponseWriter, _ *http.Request) {
+	conf := config.Get()
+	if len(conf.Bark) > 0 {
+		for _, v := range conf.Bark {
+			notify.Push(v, "Bark 测试")
+		}
+	}
+	if len(conf.PushPlus) > 0 {
+		for _, v := range conf.PushPlus {
+			notify.PushPlus(v, "PushPlus 测试")
+		}
+	}
+	_, _ = io.WriteString(w, "已发送通知, 如未收到通知请查看配置是否正确\n")
 }
 
 // GetAddress 获取地址
@@ -138,24 +157,24 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 		audioNeeded := r.Form.Get("audio_needed")
 		conf.AudioNeeded = audioNeeded != "0"
 	}
-	if r.Form.Get("users") != "" {
-		list := strings.Split(r.Form.Get("users"), ",")
-		conf.Users = append(conf.Users, list...)
+	if r.Form.Get("bark") != "" {
+		list := strings.Split(r.Form.Get("bark"), ",")
+		conf.Bark = append(conf.Bark, list...)
 	}
-	if r.Form.Get("an_users") != "" {
-		list := strings.Split(r.Form.Get("an_users"), ",")
-		conf.AndroidUsers = append(conf.AndroidUsers, list...)
+	if r.Form.Get("push_plus") != "" {
+		list := strings.Split(r.Form.Get("push_plus"), ",")
+		conf.PushPlus = append(conf.PushPlus, list...)
 	}
 
 	// 更新配置并写入文件
-	bs := json.MustEncodePretty(conf)
+	bs := yaml.MustEncode(conf)
 	err = config.Set(bs)
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error())
 		return
 	}
 	config.Reload()
-	_, err = io.WriteString(w, "重载配置文件成功\n"+string(bs))
+	_, err = io.WriteString(w, "重载配置文件成功\n"+string(bs)+"\n")
 	if err != nil {
 		log.Println("io.WriteString error =>", err)
 	}
@@ -195,10 +214,10 @@ func validParams(r *http.Request) bool {
 	if r.Form.Get("audio_needed") != "" {
 		return true
 	}
-	if r.Form.Get("users") != "" {
+	if r.Form.Get("bark") != "" {
 		return true
 	}
-	if r.Form.Get("an_users") != "" {
+	if r.Form.Get("push_plus") != "" {
 		return true
 	}
 	return false

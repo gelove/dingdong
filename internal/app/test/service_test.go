@@ -2,6 +2,7 @@ package test
 
 import (
 	"testing"
+	"time"
 
 	_ "dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
@@ -35,20 +36,20 @@ func TestGetHomeFlowDetail(t *testing.T) {
 	t.Log(json.MustEncodePrettyString(list))
 }
 
-func TestGetAddress(t *testing.T) {
-	list, err := session.GetAddress()
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(list)
-}
-
 func TestGetUser(t *testing.T) {
 	user, err := session.GetUser()
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(user)
+}
+
+func TestGetAddress(t *testing.T) {
+	list, err := session.GetAddress()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(list)
 }
 
 func TestAllCheck(t *testing.T) {
@@ -68,7 +69,9 @@ func TestGetCart(t *testing.T) {
 
 func TestGetMultiReserveTime(t *testing.T) {
 	cartMap := service.MockCartMap()
+	now := time.Now()
 	_, err := service.GetMultiReserveTime(cartMap)
+	t.Logf("Millisecond => %d ms", time.Now().Sub(now).Milliseconds())
 	if err != nil {
 		t.Error(err)
 	}

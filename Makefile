@@ -19,7 +19,7 @@ APP = dingdong
 # 可执行文件名称
 APP_EXE = ${APP}${EXT}
 MAIN = ./cmd/${APP}
-CONFIG = config.json
+CONFIG = config.yml
 RELEASE_DIR = release
 RELEASE_OS = ${RELEASE_DIR}/${OS}-${ARCH}
 RELEASE_APP = ${RELEASE_OS}/${APP_EXE}
@@ -33,7 +33,7 @@ generate:
 	go generate ./...
 
 build:
-	GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN}
+	CGO_ENABLE=0 GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN}
 
 compress:
 	upx ${RELEASE_APP}
@@ -47,5 +47,5 @@ test:
 	go test -v ./...
 
 pack: build-upx
-	cp -r config.json $(RELEASE_OS)
+	cp -r ${CONFIG} $(RELEASE_OS)
 	cd $(RELEASE_DIR) && zip -r ${APP}-${OS}-${ARCH}-$(NOW).zip ${OS}-${ARCH}

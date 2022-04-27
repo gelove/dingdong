@@ -2,7 +2,6 @@ package bark
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -64,7 +63,6 @@ func (b bark) Name() string {
 
 func (b bark) Send() error {
 	url := fmt.Sprintf("%s/%s/%s/%s?sound=%s&icon=%s", b.Api, b.DeviceKey, b.Title, b.Body, b.Sound, b.Icon)
-	log.Println(url)
 	resp, err := req.C().R().Send(http.MethodGet, url)
 	if err != nil {
 		return errs.Wrap(code.RequestFailed, err)

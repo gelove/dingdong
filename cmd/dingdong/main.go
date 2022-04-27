@@ -27,7 +27,7 @@ func main() {
 		panic(err)
 	}
 	log.Println(dir)
-	config.Initialize(dir + "/config.json")
+	config.Initialize(dir + "/config.yml")
 	session.Initialize()
 
 	app.Run()
