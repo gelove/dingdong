@@ -2,7 +2,7 @@
 
 [![dingdong-release](https://github.com/gelove/dingdong/actions/workflows/go.yml/badge.svg)](https://github.com/gelove/dingdong/actions/workflows/go.yml)
 
-## 下载可执行程序 (非码农请直接下载并运行，不需要下载源码！！！)
+## 下载可执行程序 (非码农请直接下载并运行, 不需要安装环境, 不需要下载源码！！！)
 
 从 [Github Release](https://github.com/gelove/dingdong/releases) 下载对应系统的最新版本
 

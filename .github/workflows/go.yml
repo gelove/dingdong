@@ -5,90 +5,31 @@ on:
     tags:
       - v*
 
+env:
+  CMD_PATH: ./cmd/dingdong
+  BIN_NAME: dingdong
+  GO_VERSION: 1.18
+
 jobs:
-  build:
+  releases-matrix:
+    name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go_version:
-          - 1.18
+        # build and publish in parallel: darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64
+        goos: [darwin, linux, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - uses: wangyoucao577/go-release-action@v1.28
         with:
-          go-version: ${{ matrix.go_version }}
-
-      # Cache go build cache, used to speedup go test
-      - name: Setup Golang caches
-        uses: actions/cache@v3
-        with:
-          path: |
-            /go/pkg/.cache/go-build
-            /go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
-
-      - name: Mod download
-        run: go mod tidy
-
-      - run: mkdir -p build
-
-      - name: Build with xgo
-        uses: TianTianBigWang/ghaction-xgo@master
-        with:
-          xgo_version: v0.1
-          go_version: ${{ matrix.go_version }}
-          dest: build
-          pkg: cmd/dingdong
-          prefix: dingdong
-          targets: darwin/amd64,darwin/arm64,linux/amd64,linux/arm64,windows/amd64
-          v: true
-          x: false
-          race: false
-          ldflags: -s -w
-          buildmode: default
-
-      - name: Move
-        run: |
-          echo $GITHUB_WORKSPACE
-          ls -al $GITHUB_WORKSPACE/build
-          
-          mkdir -p release/dingdong-darwin-amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-amd64 release/dingdong-darwin-amd64/dingdong && chmod +x release/dingdong-darwin-amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-darwin-amd64/config.yml
-          
-          mkdir -p release/dingdong-darwin-arm64
-          mv $GITHUB_WORKSPACE/build/dingdong-darwin-10.16-arm64 release/dingdong-darwin-arm64/dingdong && chmod +x release/dingdong-darwin-arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-darwin-arm64/config.yml
-          
-          mkdir -p release/dingdong-linux-amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-linux-amd64 release/dingdong-linux-amd64/dingdong && chmod +x release/dingdong-linux-amd64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-linux-amd64/config.yml
-          
-          mkdir -p release/dingdong-linux-arm64
-          mv $GITHUB_WORKSPACE/build/dingdong-linux-arm64 release/dingdong-linux-arm64/dingdong && chmod +x release/dingdong-linux-arm64/dingdong
-          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-linux-arm64/config.yml
-          
-          mkdir -p release/dingdong-windows-amd64
-          mv $GITHUB_WORKSPACE/build/dingdong-windows-4.0-amd64.exe release/dingdong-windows-amd64/dingdong.exe
-          cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-windows-amd64/config.yml
-
-          cd release
-          tar -zcvf dingdong-darwin-amd64.tar.gz dingdong-darwin-amd64
-          tar -zcvf dingdong-darwin-arm64.tar.gz dingdong-darwin-arm64
-          tar -zcvf dingdong-linux-amd64.tar.gz dingdong-linux-amd64
-          tar -zcvf dingdong-linux-arm64.tar.gz dingdong-linux-arm64
-          zip -q -r dingdong-windows-amd64.zip dingdong-windows-amd64
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            release/dingdong-darwin-amd64.tar.gz
-            release/dingdong-darwin-arm64.tar.gz
-            release/dingdong-linux-amd64.tar.gz
-            release/dingdong-linux-arm64.tar.gz
-            release/dingdong-windows-amd64.zip
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: ${{ env.GO_VERSION }}
+          project_path: "${{ env.CMD_PATH }}"
+          binary_name: "${{ env.BIN_NAME }}"
+          extra_files: config.yml LICENSE README.md
