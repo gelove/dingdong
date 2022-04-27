@@ -123,8 +123,7 @@ func (t *Task) AllCheck(wg *sync.WaitGroup) {
 				continue
 			}
 			log.Println("===== 购物车全选 =====")
-			// <-time.After(time.Second * 5)
-			return
+			<-time.After(time.Second * 5)
 		}
 	}
 }
@@ -150,8 +149,7 @@ func (t *Task) GetCart(wg *sync.WaitGroup) {
 				continue
 			}
 			t.SetCartMap(cartMap)
-			// <-time.After(time.Duration(duration) * time.Millisecond)
-			return
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
 	}
 }
@@ -178,8 +176,7 @@ func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
 			t.SetReserveTime(reserveTime)
 			log.Println("===== 有效配送时段已更新 =====")
 			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
-			// <-time.After(time.Duration(duration) * time.Millisecond)
-			return
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
 	}
 }
@@ -232,8 +229,7 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 			}
 			t.SetCheckOrderMap(checkOrderMap)
 			log.Println("===== 订单信息已更新 =====")
-			// <-time.After(time.Duration(duration) * time.Millisecond)
-			return
+			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
 	}
 }
