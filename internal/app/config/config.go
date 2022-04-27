@@ -25,7 +25,7 @@ type Config struct {
 	NotifyNeeded       bool              `yaml:"notify_needed"`        // 通知开关 发现有可配送时段时通知大家有可购商品
 	AudioNeeded        bool              `yaml:"audio_needed"`         // 播放音频开关 在下单成功后播放音频
 	Headers            map[string]string `yaml:"headers"`              // 请求头
-	Mock               map[string]string `yaml:"mock"`                 // 模拟参数测试用
+	Mock               map[string]string `yaml:"mock,omitempty"`       // 模拟参数测试用
 	Bark               []string          `yaml:"bark"`                 // bark 用户
 	PushPlus           []string          `yaml:"push_plus"`            // push_plus 用户
 }
