@@ -73,10 +73,9 @@ jobs:
           cp $GITHUB_WORKSPACE/config.example.yml release/dingdong-windows-amd64/config.yml
 
           cd release
-          upx dingdong-darwin-amd64/dingdong && chmod +x dingdong-darwin-amd64/dingdong
-          upx dingdong-darwin-arm64/dingdong && chmod +x dingdong-darwin-arm64/dingdong
-          upx dingdong-linux-amd64/dingdong && chmod +x dingdong-linux-amd64/dingdong
-          upx dingdong-windows-amd64/dingdong.exe
+          chmod +x dingdong-darwin-amd64/dingdong
+          chmod +x dingdong-darwin-arm64/dingdong
+          chmod +x dingdong-linux-amd64/dingdong
           tar -zcvf dingdong-darwin-amd64.tar.gz dingdong-darwin-amd64
           tar -zcvf dingdong-darwin-arm64.tar.gz dingdong-darwin-arm64
           tar -zcvf dingdong-linux-amd64.tar.gz dingdong-linux-amd64
