@@ -25,6 +25,8 @@
 3. 回到叮咚买菜微信小程序, 商品加入购物车并结算提交(无需付款)使得小程序发起网络请求
 4. 回到Stream停止抓包并查看抓包历史, 点击按域名, 会看到 maicai.api.ddxq.mobi 这个域名下的请求
 
+感谢群友 邱建忠 提供的前端网页
+
 感谢群友 hhhhg~ 提供的教程 <a href="/assets/doc/windows端小白教程.docx" target="_blank">windows端小白教程.docx</a>
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)

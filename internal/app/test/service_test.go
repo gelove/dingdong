@@ -77,11 +77,13 @@ func TestGetMultiReserveTime(t *testing.T) {
 	}
 }
 
+// TestMockMultiReserveTime 模拟运力数据
 func TestMockMultiReserveTime(t *testing.T) {
 	task := service.NewTask()
 	defer task.Finished()
 	task.MockMultiReserveTime()
-	t.Log(task.ReserveTime())
+	times := task.ReserveTime()
+	t.Log(json.MustEncodePrettyString(times))
 }
 
 func TestCheckOrder(t *testing.T) {

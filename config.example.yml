@@ -12,13 +12,11 @@ monitor_interval_max: 35 # 监听调用接口的最大时间间隔 单位:秒 �
 notify_needed: true # 通知开关 发现运力时或捡漏成功时的通知 使用需同时打开监听或捡漏
 audio_needed: true # 播放音频开关 在订单提交成功后播放音频
 headers:
-  cookie: DDXQSESSID=; dd_guid=    # 注意 新的cookie格式 "DDXQSESSID=xxx; dd_guid=yyy"
+  cookie: DDXQSESSID=; dd_guid= # 注意 新的cookie格式 "DDXQSESSID=xxx; dd_guid=yyy"
   user-agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15
     (KHTML like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI
     Language/zh_CN # 默认 UA, 可以用默认的或者改为自己手机的 UA
-bark: # Bark 用户组, 苹果使用 Bark 推送通知
-  - 你的 Bark token
-#  - 与你同属一个叮咚发货站点的用户
-push_plus: # PushPlus 用户组, 安卓和苹果都可使用 PushPlus 通过微信通知
-  - 你的 PushPlus token
-#  - 与你同属一个叮咚发货站点的用户
+bark: # Bark 用户组, 苹果使用 Bark 推送通知, 可以添加多个与你同属一个叮咚发货站点的用户
+  - xxx # xxx 替换为你自己的 Bark token
+push_plus: # PushPlus 用户组, 安卓和苹果都可使用 PushPlus 通过微信通知, 可以添加多个与你同属一个叮咚发货站点的用户
+  - xxx # xxx 替换为你自己的 PushPlus token,

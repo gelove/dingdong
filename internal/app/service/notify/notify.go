@@ -17,7 +17,7 @@ func send(n notify.Notifier) {
 }
 
 func Push(token, detail string) {
-	if token == "" {
+	if len(token) < 20 {
 		return
 	}
 	icon := "https://images.liqucn.com/img/h1/h968/img201709191609410_info300X300.jpg"
@@ -25,7 +25,7 @@ func Push(token, detail string) {
 }
 
 func PushPlus(token, detail string) {
-	if token == "" {
+	if len(token) < 20 {
 		return
 	}
 	send(pushplus.New(token, "买菜助手", detail))
