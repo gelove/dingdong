@@ -183,29 +183,7 @@ func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
 }
 
 func (t *Task) MockMultiReserveTime() {
-	reserveTime := &reserve_time.GoTimes{}
-	halfPastTwoPM := date.TodayUnix(14, 30, 0)
-	now := time.Now().Unix()
-	conf := config.Get()
-	if now >= date.FirstSnapUpUnix()-conf.AdvanceTime && now <= date.FirstSnapUpUnix() {
-		reserveTime.StartTimestamp = date.TodayUnix(6, 30, 0)
-		reserveTime.EndTimestamp = halfPastTwoPM
-		t.SetReserveTime(reserveTime)
-		return
-	}
-	if now >= date.SecondSnapUpUnix()-conf.AdvanceTime && now <= date.SecondSnapUpUnix() {
-		reserveTime.StartTimestamp = halfPastTwoPM
-		reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
-		t.SetReserveTime(reserveTime)
-		return
-	}
-	var fiveMinutes int64 = 5 * 60
-	if now > halfPastTwoPM-fiveMinutes {
-		reserveTime.StartTimestamp = now + fiveMinutes // 叮咚是在当前时间直接加5分钟
-	} else {
-		reserveTime.StartTimestamp = halfPastTwoPM
-	}
-	reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
+	reserveTime := MockMultiReserveTime()
 	t.SetReserveTime(reserveTime)
 }
 

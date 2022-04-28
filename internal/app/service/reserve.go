@@ -3,8 +3,11 @@ package service
 import (
 	"log"
 	"net/http"
+	"time"
 
+	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
+	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
@@ -27,6 +30,31 @@ func MockCartMap() map[string]interface{} {
 	cartMap := make(map[string]interface{})
 	cartMap["products"] = products
 	return cartMap
+}
+
+func MockMultiReserveTime() *reserve_time.GoTimes {
+	reserveTime := &reserve_time.GoTimes{}
+	halfPastTwoPM := date.TodayUnix(14, 30, 0)
+	now := time.Now().Unix()
+	conf := config.Get()
+	if now >= date.TodayUnix(0, 0, 0) && now <= date.FirstSnapUpUnix() {
+		reserveTime.StartTimestamp = date.TodayUnix(6, 30, 0)
+		reserveTime.EndTimestamp = halfPastTwoPM
+		return reserveTime
+	}
+	if now >= date.SecondSnapUpUnix()-conf.AdvanceTime && now <= date.SecondSnapUpUnix() {
+		reserveTime.StartTimestamp = halfPastTwoPM
+		reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
+		return reserveTime
+	}
+	var fiveMinutes int64 = 5 * 60
+	if now > halfPastTwoPM-fiveMinutes {
+		reserveTime.StartTimestamp = now + fiveMinutes // 叮咚是在当前时间直接加5分钟
+	} else {
+		reserveTime.StartTimestamp = halfPastTwoPM
+	}
+	reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
+	return reserveTime
 }
 
 func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes, error) {

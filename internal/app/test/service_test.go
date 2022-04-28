@@ -79,10 +79,7 @@ func TestGetMultiReserveTime(t *testing.T) {
 
 // TestMockMultiReserveTime 模拟运力数据
 func TestMockMultiReserveTime(t *testing.T) {
-	task := service.NewTask()
-	defer task.Finished()
-	task.MockMultiReserveTime()
-	times := task.ReserveTime()
+	times := service.MockMultiReserveTime()
 	t.Log(json.MustEncodePrettyString(times))
 }
 
@@ -104,10 +101,9 @@ func TestAddNewOrder(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	reserveTimes, err := service.GetMultiReserveTime(cartMap)
-	if err != nil {
-		t.Error(err)
-	}
+
+	reserveTimes := service.MockMultiReserveTime()
+
 	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
 	if err != nil {
 		t.Error(err)

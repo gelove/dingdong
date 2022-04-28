@@ -2,7 +2,6 @@ package app
 
 import (
 	"log"
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -45,17 +44,20 @@ func Monitor() {
 	cartMap := service.MockCartMap()
 	for {
 		conf := config.Get()
-		duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
+		<-time.After(time.Second)
+		// duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
 		if !conf.MonitorNeeded && !conf.PickUpNeeded {
-			<-time.After(time.Duration(duration) * time.Second)
 			continue
 		}
 		if isPeak() {
 			log.Println("当前高峰期或暂未营业")
-			<-time.After(time.Duration(duration) * time.Second)
+			continue
+		}
+		now := time.Now()
+		if now.Second() != 1 {
 			continue
 		}
 		service.MonitorAndPickUp(cartMap)
-		<-time.After(time.Duration(duration) * time.Second)
+		// <-time.After(time.Duration(duration) * time.Second)
 	}
 }

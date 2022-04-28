@@ -149,27 +149,29 @@ func chooseAddr() {
 
 func GetHeaders() map[string]string {
 	headers := map[string]string{
-		// "accept-encoding" : "gzip, deflate, br", // 压缩有乱码
-		// "Connection" : "keep-alive",
-		"Accept":             "application/json, text/plain, */*",
-		"Accept-Language":    "zh-CN,zh-Hans;q=0.9",
-		"Content-Type":       "application/x-www-form-urlencoded",
+		// "accept":             "application/json, text/plain, */*",
+		// "accept-encoding":    "gzip,compress,br,deflate", // 压缩可能有乱码
+		// "accept-language":    "zh-CN,zh-Hans;q=0.9",
+		// "content-type":       "application/x-www-form-urlencoded",
 		"ddmc-city-number":   s.Address.CityNumber,
-		"ddmc-station-id":    s.Address.StationId,
 		"ddmc-longitude":     strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64),
 		"ddmc-latitude":      strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64),
+		"ddmc-station-id":    s.Address.StationId,
 		"ddmc-uid":           s.UserID,
 		"ddmc-time":          strconv.Itoa(int(time.Now().Unix())),
+		"ddmc-channel":       "applet",
+		"ddmc-os-version":    "[object Undefined]",
 		"ddmc-app-client-id": "3",
-		"ddmc-api-version":   "9.50.2",
-		"ddmc-build-version": "2.85.3",
-		"ddmc-channel":       "undefined",
-		"ddmc-device-id":     "",
+		"ddmc-api-version":   "9.44.0",
+		"ddmc-build-version": "2.74.2",
+		"ddmc-sdkversion":    "2.13.2",
 		"ddmc-ip":            "",
-		"ddmc-os-version":    "undefined",
+		"ddmc-device-id":     "",
+		"referer":            "https://servicewechat.com/wx1e113254eda17715/425/page-frame.html",
+		"user-agent":         "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI Language/zh_CN",
 	}
 	h := config.Get().Headers
-	log.Printf("custom headers: %#v", h)
+	// log.Printf("custom headers: %#v", h)
 	for k, v := range h {
 		headers[k] = v
 	}
@@ -185,13 +187,15 @@ func GetParams(headers map[string]string) map[string]string {
 		"city_number":   headers["ddmc-city-number"],
 		"api_version":   headers["ddmc-api-version"],
 		"app_version":   headers["ddmc-build-version"],
+		"app_client_id": headers["ddmc-app-client-id"],
+		"channel":       headers["ddmc-channel"],
+		"openid":        headers["ddmc-device-id"],
+		"time":          headers["ddmc-time"],
+		"s_id":          strings.TrimLeft(strings.Split(headers["Cookie"], ";")[0], "DDXQSESSID="),
 		"applet_source": "",
-		"app_client_id": "3",
 		"h5_source":     "",
 		"sharer_uid":    "",
-		"s_id":          strings.TrimLeft(strings.Split(headers["Cookie"], ";")[0], "DDXQSESSID="),
-		"openid":        "",
-		"time":          headers["ddmc-time"],
+		"device_token":  "",
 	}
 	p := config.Get().Params
 	for k, v := range p {
