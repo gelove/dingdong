@@ -37,8 +37,6 @@ func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes,
 	productsJson := json.MustEncodeToString(productsList)
 
 	headers := session.GetHeaders()
-	// 响应压缩有乱码 暂不压缩
-	// headers["accept-encoding"] = "gzip, deflate, br"
 	params := session.GetParams(headers)
 	params["address_id"] = session.Address().Id
 	params["group_config_id"] = ""

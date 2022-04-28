@@ -20,6 +20,9 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
+      - name: upx
+        run: upx -V
+
       # Cache go build cache, used to speedup go test
       - name: Setup Golang caches
         uses: actions/cache@v3

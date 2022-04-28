@@ -122,7 +122,7 @@ func (t *Task) AllCheck(wg *sync.WaitGroup) {
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
 			}
-			log.Println("===== 购物车全选 =====")
+			log.Println("===== 购物车全选成功 =====")
 			<-time.After(time.Second * 5)
 		}
 	}
@@ -142,6 +142,7 @@ func (t *Task) GetCart(wg *sync.WaitGroup) {
 				log.Println(err)
 				if e, ok := err.(errs.Error); ok {
 					if e.CodeEqual(code.NoValidProduct) {
+						t.Finished()
 						return
 					}
 				}
@@ -220,6 +221,7 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
+			t.MockMultiReserveTime() // 更新配送时段
 			duration := durationMinMillis + rand.Intn(durationGapMillis)
 			checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
 			if err != nil {
@@ -246,6 +248,7 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
+			t.MockMultiReserveTime() // 更新配送时段
 			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 			if err != nil {
 				_err := errs.New(code.ReserveTimeIsDisabled)

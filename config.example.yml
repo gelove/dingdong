@@ -11,11 +11,22 @@ monitor_interval_min: 25 # 监听调用接口的最小时间间隔, 单位:秒, 
 monitor_interval_max: 35 # 监听调用接口的最大时间间隔, 单位:秒, 默认为35秒
 notify_needed: true # 通知开关, 发现运力时或捡漏成功时的通知, 使用需同时打开监听或捡漏
 audio_needed: true # 播放音频开关, 在订单提交成功后播放音频
-headers:
+pay_type: 6 # 支付方式
+headers: # 请求头 用户可以自定义, 自由增加删除参数
   cookie:  # 注意 新的cookie格式 "DDXQSESSID=xxx; dd_guid=yyy", 如果抓不到新的cookie则仍使用旧版cookie
   user-agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15
     (KHTML like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI
     Language/zh_CN # 默认 UA, 可以用默认的或者改为自己手机的 UA
+  referer: https://wx.m.ddxq.mobi/
+  ddmc-app-client-id: 3
+  ddmc-api-version: 9.50.2
+  ddmc-build-version: 2.85.3
+  ddmc-channel: undefined,
+  ddmc-device-id:
+  ddmc-os-version: undefined
+params: # 请求参数 用户可以自定义, 自由增加删除参数
+  device_token:
+  app_client_id: 3
 bark: # Bark 用户组, 苹果使用 Bark 推送通知, 可以添加多个与你同属一个叮咚发货站点的用户
   - xxx # xxx 替换为你自己的 Bark token, 域名默认为"https://api.day.app", 如果你的域名不是默认的, 需要加上域名前缀
 push_plus: # PushPlus 用户组, 安卓和苹果都可使用 PushPlus 通过微信通知, 可以添加多个与你同属一个叮咚发货站点的用户

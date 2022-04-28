@@ -18,7 +18,7 @@ func init() {
 func main() {
 	defer func() {
 		if v := recover(); v != nil {
-			log.Printf("[严重错误]: 请通知作者 %+v", v)
+			log.Printf("[严重错误]: %+v", v)
 		}
 	}()
 

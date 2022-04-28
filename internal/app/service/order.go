@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/errs"
@@ -82,7 +83,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "检测订单失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.InvalidResponse, "订单校验失败 => "+json.MustEncodeToString(result))
 	}
 	body, err := resp.ToBytes()
 	if err != nil {
@@ -94,8 +95,8 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 	freight := order.Get("freights", 0, "freight")
 	res := map[string]interface{}{
 		"price":                  order.Get("total_money").ToString(),              // 总价
-		"freight_money":          freight.Get("freight_money").ToString(),          // 运费
 		"freight_discount_money": freight.Get("discount_freight_money").ToString(), // 运费折扣
+		"freight_money":          freight.Get("freight_money").ToString(),          // 运费
 		"order_freight":          freight.Get("freight_real_money").ToString(),     // 订单真实运费
 	}
 	if order.Get("default_coupon", "_id").ToString() != "" {
@@ -113,7 +114,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		"reserved_time_end":      reserveTime.EndTimestamp,
 		"parent_order_sign":      cartMap["parent_order_sign"],
 		"address_id":             session.Address().Id,
-		"pay_type":               6,
+		"pay_type":               3,
 		"product_type":           1,
 		"form_id":                strings.ReplaceAll(uuid.New().String(), "-", ""),
 		"receipt_without_sku":    nil,
@@ -122,6 +123,11 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		"coupons_money":          "",
 		"coupons_id":             "",
 	}
+	conf := config.Get()
+	if conf.PayType > 0 {
+		paymentOrder["pay_type"] = conf.PayType
+	}
+
 	for k, v := range checkOrderMap {
 		if v == nil {
 			continue

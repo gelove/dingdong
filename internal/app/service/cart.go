@@ -37,7 +37,6 @@ func AllCheck() error {
 	if !result.Success {
 		return errs.WithMessage(code.InvalidResponse, "购物车全选失败 => "+json.MustEncodeToString(result))
 	}
-	log.Println("勾选购物车全选按钮成功")
 	return nil
 }
 

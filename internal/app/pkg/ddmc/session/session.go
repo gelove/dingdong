@@ -148,53 +148,55 @@ func chooseAddr() {
 }
 
 func GetHeaders() map[string]string {
+	headers := map[string]string{
+		// "accept-encoding" : "gzip, deflate, br", // 压缩有乱码
+		// "Connection" : "keep-alive",
+		"Accept":             "application/json, text/plain, */*",
+		"Accept-Language":    "zh-CN,zh-Hans;q=0.9",
+		"Content-Type":       "application/x-www-form-urlencoded",
+		"ddmc-city-number":   s.Address.CityNumber,
+		"ddmc-station-id":    s.Address.StationId,
+		"ddmc-longitude":     strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64),
+		"ddmc-latitude":      strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64),
+		"ddmc-uid":           s.UserID,
+		"ddmc-time":          strconv.Itoa(int(time.Now().Unix())),
+		"ddmc-app-client-id": "3",
+		"ddmc-api-version":   "9.50.2",
+		"ddmc-build-version": "2.85.3",
+		"ddmc-channel":       "undefined",
+		"ddmc-device-id":     "",
+		"ddmc-ip":            "",
+		"ddmc-os-version":    "undefined",
+	}
 	h := config.Get().Headers
-
-	headers := make(map[string]string)
-	// headers["accept-encoding"] = "gzip, deflate, br" // 压缩有乱码
-	headers["Host"] = "maicai.api.ddxq.mobi"
-	headers["Referer"] = "https://wx.m.ddxq.mobi/"
-	headers["Cookie"] = h["cookie"]
-	headers["User-Agent"] = h["user-agent"]
-	headers["ddmc-city-number"] = s.Address.CityNumber // 城市id
-	headers["ddmc-api-version"] = "9.50.2"
-	headers["Origin"] = "https://wx.m.ddxq.mobi"
-	headers["ddmc-build-version"] = "2.85.3"
-	headers["ddmc-longitude"] = strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64)
-	headers["ddmc-latitude"] = strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64)
-	headers["ddmc-app-client-id"] = "3"
-	// headers["Connection"] = "keep-alive"
-	headers["ddmc-uid"] = s.UserID // 用户id
-	headers["Accept-Language"] = "zh-CN,zh-Hans;q=0.9"
-	headers["ddmc-channel"] = "undefined"
-	headers["ddmc-device-id"] = ""
-	headers["Accept"] = "application/json, text/plain, */*"
-	headers["Content-Type"] = "application/x-www-form-urlencoded"
-	headers["ddmc-station-id"] = s.Address.StationId // 发货站点id
-	headers["ddmc-ip"] = ""
-	headers["ddmc-os-version"] = "undefined"
-	// headers["ddmc-time"] = strconv.Itoa(int(time.Now().Unix()))
+	log.Printf("custom headers: %#v", h)
+	for k, v := range h {
+		headers[k] = v
+	}
 	return headers
 }
 
 func GetParams(headers map[string]string) map[string]string {
-	params := make(map[string]string)
-	params["uid"] = headers["ddmc-uid"]
-	params["longitude"] = headers["ddmc-longitude"]
-	params["latitude"] = headers["ddmc-latitude"]
-	params["station_id"] = headers["ddmc-station-id"]
-	params["city_number"] = headers["ddmc-city-number"]
-	params["api_version"] = headers["ddmc-api-version"]
-	params["app_version"] = headers["ddmc-build-version"]
-	params["applet_source"] = ""
-	params["app_client_id"] = "3"
-	params["h5_source"] = ""
-	params["wx"] = "1"
-	params["sharer_uid"] = ""
-	params["s_id"] = strings.TrimLeft(strings.Split(headers["Cookie"], ";")[0], "DDXQSESSID=")
-	params["openid"] = ""
-	params["time"] = headers["ddmc-time"]
-	params["device_token"] = ""
+	params := map[string]string{
+		"uid":           headers["ddmc-uid"],
+		"longitude":     headers["ddmc-longitude"],
+		"latitude":      headers["ddmc-latitude"],
+		"station_id":    headers["ddmc-station-id"],
+		"city_number":   headers["ddmc-city-number"],
+		"api_version":   headers["ddmc-api-version"],
+		"app_version":   headers["ddmc-build-version"],
+		"applet_source": "",
+		"app_client_id": "3",
+		"h5_source":     "",
+		"sharer_uid":    "",
+		"s_id":          strings.TrimLeft(strings.Split(headers["Cookie"], ";")[0], "DDXQSESSID="),
+		"openid":        "",
+		"time":          headers["ddmc-time"],
+	}
+	p := config.Get().Params
+	for k, v := range p {
+		params[k] = v
+	}
 	return params
 }
 
