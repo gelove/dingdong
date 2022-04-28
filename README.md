@@ -27,7 +27,7 @@
 
 感谢群友 邱建忠 提供的前端网页
 
-感谢群友 hhhhg~ 提供的教程 <a href="/assets/doc/windows端小白教程.docx" target="_blank">windows端小白教程.docx</a>
+感谢群友 hhhhg~ 提供的教程 <a href="https://github.com/gelove/dingdong/blob/main/assets/doc/安卓抓包方法及Windows端小白教程.docx" target="_blank">安卓抓包方法及Windows端小白教程.docx</a>
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
 
