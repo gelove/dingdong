@@ -114,7 +114,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		"reserved_time_end":      reserveTime.EndTimestamp,
 		"parent_order_sign":      cartMap["parent_order_sign"],
 		"address_id":             session.Address().Id,
-		"pay_type":               3,
+		"pay_type":               6,
 		"product_type":           1,
 		"form_id":                strings.ReplaceAll(uuid.New().String(), "-", ""),
 		"receipt_without_sku":    nil,
