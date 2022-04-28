@@ -20,8 +20,8 @@ headers: # 请求头 用户可以自定义, 自由增加删除参数
   ddmc-api-version: 9.44.0
   ddmc-build-version: 2.74.2
   ddmc-sdkversion: 2.13.2
-  ddmc-channel: applet
-  ddmc-os-version: '[object Undefined]'
+  ddmc-channel: undefined
+  ddmc-os-version: undefined
 params: # 请求参数 用户可以自定义, 自由增加删除参数
   device_token: '' # 填写自己抓包得到的 device_token
 bark: # Bark 用户组, 苹果使用 Bark 推送通知, 可以添加多个与你同属一个叮咚发货站点的用户

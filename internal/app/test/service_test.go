@@ -100,6 +100,7 @@ func TestAddNewOrder(t *testing.T) {
 	cartMap, err := service.GetCart()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	reserveTimes := service.MockMultiReserveTime()
@@ -107,10 +108,12 @@ func TestAddNewOrder(t *testing.T) {
 	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	err = service.AddNewOrder(cartMap, reserveTimes, orderMap)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 }
 
