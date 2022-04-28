@@ -17,6 +17,6 @@ headers:
     (KHTML like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI
     Language/zh_CN # 默认 UA, 可以用默认的或者改为自己手机的 UA
 bark: # Bark 用户组, 苹果使用 Bark 推送通知, 可以添加多个与你同属一个叮咚发货站点的用户
-  - xxx # xxx 替换为你自己的 Bark token
+  - xxx # xxx 替换为你自己的 Bark token, 域名默认为"https://api.day.app", 如果你的域名不是默认的, 需要加上域名前缀
 push_plus: # PushPlus 用户组, 安卓和苹果都可使用 PushPlus 通过微信通知, 可以添加多个与你同属一个叮咚发货站点的用户
   - xxx # xxx 替换为你自己的 PushPlus token
