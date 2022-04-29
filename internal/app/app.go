@@ -49,12 +49,12 @@ func Monitor() {
 		if !conf.MonitorNeeded && !conf.PickUpNeeded {
 			continue
 		}
-		if isPeak() {
-			log.Println("当前高峰期或暂未营业")
-			continue
-		}
 		now := time.Now()
 		if now.Second() != 1 {
+			continue
+		}
+		if isPeak() {
+			log.Println("当前高峰期或暂未营业")
 			continue
 		}
 		service.MonitorAndPickUp(cartMap)

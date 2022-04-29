@@ -5,7 +5,6 @@ import (
 	"time"
 
 	_ "dingdong/internal/app/config"
-	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/service"
 	"dingdong/pkg/js"
@@ -32,6 +31,7 @@ func TestGetHomeFlowDetail(t *testing.T) {
 	list, err := service.GetHomeFlowDetail()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	t.Log(json.MustEncodePrettyString(list))
 }
@@ -40,6 +40,7 @@ func TestGetUser(t *testing.T) {
 	user, err := session.GetUser()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	t.Log(user)
 }
@@ -48,6 +49,7 @@ func TestGetAddress(t *testing.T) {
 	list, err := session.GetAddress()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	t.Log(list)
 }
@@ -56,13 +58,16 @@ func TestAllCheck(t *testing.T) {
 	err := service.AllCheck()
 	if err != nil {
 		t.Error(err)
+		return
 	}
+	t.Log("All check success")
 }
 
 func TestGetCart(t *testing.T) {
 	cartMap, err := service.GetCart()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	t.Logf("%#v", cartMap)
 }
@@ -70,11 +75,12 @@ func TestGetCart(t *testing.T) {
 func TestGetMultiReserveTime(t *testing.T) {
 	cartMap := service.MockCartMap()
 	now := time.Now()
-	_, err := service.GetMultiReserveTime(cartMap)
+	times, err := service.GetMultiReserveTime(cartMap)
 	t.Logf("Millisecond => %d ms", time.Now().Sub(now).Milliseconds())
 	if err != nil {
 		t.Error(err)
 	}
+	t.Log(json.MustEncodePrettyString(times))
 }
 
 // TestMockMultiReserveTime 模拟运力数据
@@ -84,27 +90,32 @@ func TestMockMultiReserveTime(t *testing.T) {
 }
 
 func TestCheckOrder(t *testing.T) {
-	reserveTimes := &reserve_time.GoTimes{}
-	cartMap, err := service.GetCart()
-	if err != nil {
-		t.Error(err)
-	}
-	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
-	if err != nil {
-		t.Error(err)
-	}
-	t.Logf("%#v", orderMap)
-}
-
-func TestAddNewOrder(t *testing.T) {
 	cartMap, err := service.GetCart()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-
 	reserveTimes := service.MockMultiReserveTime()
+	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("%#v", orderMap)
+}
 
+func TestAddNewOrder(t *testing.T) {
+	err := service.AllCheck()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	cartMap, err := service.GetCart()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	reserveTimes := service.MockMultiReserveTime()
 	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
 	if err != nil {
 		t.Error(err)

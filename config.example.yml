@@ -2,10 +2,10 @@ name: 叮咚买菜助手
 addr: :9999 # web服务端口号 多开需修改为其他端口号
 base_concurrency: 1 # 除了提交订单的其他请求并发数, 默认为1
 submit_concurrency: 2 # 最后提交订单的并发数, 默认为2
-snap_up: 3 # 抢购, 0 关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
+snap_up: 0 # 抢购, 0 关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
 advance_time: 20 # 抢购提前进入时间, 单位:秒, 默认为20秒
 pick_up_needed: false # 闲时捡漏开关, false 关闭, true 打开, 在抢购高峰期之外的时间捡漏
-monitor_needed: false # 监听开关, 监听是否有可配送时段
+monitor_needed: true # 监听开关, 监听是否有可配送时段
 monitor_success_wait: 10 # 成功监听(发起捡漏或通知)之后的休息时间, 单位:分钟, 默认为10分钟
 monitor_interval_min: 25 # 监听调用接口的最小时间间隔, 单位:秒, 默认为25秒 (防止被叮咚风控)
 monitor_interval_max: 35 # 监听调用接口的最大时间间隔, 单位:秒, 默认为35秒
@@ -17,9 +17,8 @@ headers: # 请求头 用户可以自定义, 自由增加删除参数
   user-agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI Language/zh_CN'
   referer: https://servicewechat.com/wx1e113254eda17715/425/page-frame.html
   ddmc-app-client-id: 3
-  ddmc-api-version: 9.44.0
-  ddmc-build-version: 2.74.2
-  ddmc-sdkversion: 2.13.2
+  ddmc-api-version: 9.50.2
+  ddmc-build-version: 2.85.3
   ddmc-channel: undefined
   ddmc-os-version: undefined
 params: # 请求参数 用户可以自定义, 自由增加删除参数

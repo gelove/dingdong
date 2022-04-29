@@ -61,15 +61,15 @@ func InitializeMock() {
 			Client: client,
 		}
 
-		conf := config.Get()
-		s.UserID = conf.Mock["ddmc-uid"]
+		mock := config.Get().Mock
+		s.UserID = mock["ddmc-uid"]
 		s.Address = address.Item{
-			Id:         conf.Mock["address_id"],
-			CityNumber: conf.Mock["ddmc-city-number"],
-			StationId:  conf.Mock["ddmc-station-id"],
+			Id:         mock["address_id"],
+			CityNumber: mock["ddmc-city-number"],
+			StationId:  mock["ddmc-station-id"],
 		}
-		longitude, _ := strconv.ParseFloat(conf.Mock["ddmc-longitude"], 64)
-		latitude, _ := strconv.ParseFloat(conf.Mock["ddmc-latitude"], 64)
+		longitude, _ := strconv.ParseFloat(mock["ddmc-longitude"], 64)
+		latitude, _ := strconv.ParseFloat(mock["ddmc-latitude"], 64)
 		s.Address.Location.Location = []float64{longitude, latitude}
 	})
 }
@@ -143,37 +143,35 @@ func chooseAddr() {
 
 	index := textual.IndexOf(addr, options)
 	s.Address = addrList[index]
+	log.Printf("Address => %#v", s.Address)
 	log.Printf("已选择收货地址: %s %s %s", s.Address.Location.Address, s.Address.Location.Name, s.Address.AddrDetail)
 	return
 }
 
 func GetHeaders() map[string]string {
 	headers := map[string]string{
-		// "accept":             "application/json, text/plain, */*",
 		// "accept-encoding":    "gzip,compress,br,deflate", // 压缩可能有乱码
-		// "accept-language":    "zh-CN,zh-Hans;q=0.9",
-		// "content-type":       "application/x-www-form-urlencoded",
+		"accept":             "application/json, text/plain, */*",
+		"accept-language":    "zh-CN,zh-Hans;q=0.9",
 		"ddmc-city-number":   s.Address.CityNumber,
 		"ddmc-longitude":     strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64),
 		"ddmc-latitude":      strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64),
 		"ddmc-station-id":    s.Address.StationId,
 		"ddmc-uid":           s.UserID,
 		"ddmc-time":          strconv.Itoa(int(time.Now().Unix())),
-		"ddmc-channel":       "applet",
-		"ddmc-os-version":    "[object Undefined]",
+		"ddmc-channel":       "undefined",
+		"ddmc-os-version":    "undefined",
 		"ddmc-app-client-id": "3",
-		"ddmc-api-version":   "9.44.0",
-		"ddmc-build-version": "2.74.2",
-		"ddmc-sdkversion":    "2.13.2",
+		"ddmc-api-version":   "9.50.2",
+		"ddmc-build-version": "2.85.3",
 		"ddmc-ip":            "",
 		"ddmc-device-id":     "",
-		"referer":            "https://servicewechat.com/wx1e113254eda17715/425/page-frame.html",
 		"user-agent":         "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI Language/zh_CN",
 	}
 	h := config.Get().Headers
 	// log.Printf("custom headers: %#v", h)
 	for k, v := range h {
-		headers[k] = v
+		headers[strings.ToLower(k)] = v
 	}
 	return headers
 }
@@ -195,7 +193,6 @@ func GetParams(headers map[string]string) map[string]string {
 		"applet_source": "",
 		"h5_source":     "",
 		"sharer_uid":    "",
-		"device_token":  "",
 	}
 	p := config.Get().Params
 	for k, v := range p {
