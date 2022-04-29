@@ -152,7 +152,7 @@ func GetHeaders() map[string]string {
 	headers := map[string]string{
 		// "accept-encoding":    "gzip,compress,br,deflate", // 压缩可能有乱码
 		"accept":             "application/json, text/plain, */*",
-		"accept-language":    "zh-CN,zh-Hans;q=0.9",
+		"accept-language":    "zh-CN,en-US;q=0.8",
 		"ddmc-city-number":   s.Address.CityNumber,
 		"ddmc-longitude":     strconv.FormatFloat(s.Address.Location.Location[0], 'f', -1, 64),
 		"ddmc-latitude":      strconv.FormatFloat(s.Address.Location.Location[1], 'f', -1, 64),
@@ -189,7 +189,7 @@ func GetParams(headers map[string]string) map[string]string {
 		"channel":       headers["ddmc-channel"],
 		"openid":        headers["ddmc-device-id"],
 		"time":          headers["ddmc-time"],
-		"s_id":          strings.TrimLeft(strings.Split(headers["Cookie"], ";")[0], "DDXQSESSID="),
+		"s_id":          strings.TrimLeft(strings.Split(headers["cookie"], ";")[0], "DDXQSESSID="),
 		"applet_source": "",
 		"h5_source":     "",
 		"sharer_uid":    "",

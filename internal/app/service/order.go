@@ -136,14 +136,15 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	}
 
 	packages := map[string]interface{}{
-		"reserved_time_start": reserveTime.StartTimestamp,
-		"reserved_time_end":   reserveTime.EndTimestamp,
-		"eta_trace_id":        "",
-		"soon_arrival":        "",
-		// "first_selected_big_time": 0,
+		"reserved_time_start":     reserveTime.StartTimestamp,
+		"reserved_time_end":       reserveTime.EndTimestamp,
+		"eta_trace_id":            "",
+		"soon_arrival":            "",
 		"first_selected_big_time": 1,
+		"real_match_supply_order": false,
+		"time_biz_type":           0,
 	}
-	fields := []string{"products", "only_today_products", "only_tomorrow_products", "can_used_balance_money", "can_used_point_money", "can_used_point_num", "cart_count", "front_package_bg_color", "front_package_stock_color", "front_package_text", "front_package_type", "goods_real_money", "instant_rebate_money", "is_presale", "is_share_station", "is_supply_order", "package_id", "package_type", "total_count", "total_money", "total_origin_money", "total_rebate_money", "used_balance_money", "used_point_money", "used_point_num"}
+	fields := []string{"products", "only_today_products", "only_tomorrow_products", "can_used_balance_money", "can_used_point_money", "can_used_point_num", "cart_count", "front_package_bg_color", "front_package_stock_color", "front_package_text", "front_package_type", "goods_real_money", "instant_rebate_money", "is_presale", "is_share_station", "is_supply_order", "real_match_supply_order", "time_biz_type", "package_id", "package_type", "total_count", "total_money", "total_origin_money", "total_rebate_money", "used_balance_money", "used_point_money", "used_point_num"}
 	for key, val := range cartMap {
 		if val == nil {
 			continue

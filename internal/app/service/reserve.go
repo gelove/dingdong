@@ -37,22 +37,17 @@ func MockMultiReserveTime() *reserve_time.GoTimes {
 	halfPastTwoPM := date.TodayUnix(14, 30, 0)
 	now := time.Now().Unix()
 	conf := config.Get()
-	if now >= date.TodayUnix(0, 0, 0) && now <= date.FirstSnapUpUnix() {
+	if now >= date.TodayUnix(0, 0, 0) && now <= date.TodayUnix(6, 20, 0) {
 		reserveTime.StartTimestamp = date.TodayUnix(6, 30, 0)
 		reserveTime.EndTimestamp = halfPastTwoPM
 		return reserveTime
 	}
-	if now >= date.SecondSnapUpUnix()-conf.AdvanceTime && now <= date.SecondSnapUpUnix() {
+	if now >= date.SecondSnapUpUnix()-conf.AdvanceTime && now <= date.TodayUnix(8, 50, 0) {
 		reserveTime.StartTimestamp = halfPastTwoPM
 		reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
 		return reserveTime
 	}
-	var fiveMinutes int64 = 5 * 60
-	if now > halfPastTwoPM-fiveMinutes {
-		reserveTime.StartTimestamp = now + fiveMinutes // 叮咚是在当前时间直接加5分钟
-	} else {
-		reserveTime.StartTimestamp = halfPastTwoPM
-	}
+	reserveTime.StartTimestamp = (now/60 + 5) * 60 // 叮咚是在当前时间直接加5分钟
 	reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
 	return reserveTime
 }

@@ -216,6 +216,7 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 
 func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	for {
 		select {
 		case <-t.timeOut.Done():
@@ -295,6 +296,8 @@ func SnapUpOnce() {
 		go task.CheckOrder(wg)
 	}
 
+	// 提前1秒开始提交订单, 提前太早有可能被风控
+	// <-time.After(time.Duration(60-1-time.Now().Second()) * time.Second)
 	for i := 0; i < conf.SubmitConcurrency; i++ {
 		wg.Add(1)
 		go task.AddNewOrder(wg)
