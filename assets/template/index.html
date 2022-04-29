@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh">
+ <!--
+❤️ 招募优秀的你，来完善前端页面！❤️
+ -->
 <head>
     <title>{{.title}}</title>
     <meta charset="UTF-8"/>
@@ -27,7 +30,12 @@
             font-size: 12px;
             letter-spacing: 1px;
         }
+        a:link {color:red;}      /* 未访问链接*/
+        a:visited {color:red;}  /* 已访问链接 */
+        a:hover {color:blue;}  /* 鼠标移动到链接上 */
+        a:active {color:black;}  /* 鼠标点击时 */
     </style>
+
 </head>
 <body>
 <article id="page-content">
@@ -53,12 +61,20 @@
 
         监听开关：
         <label>
-            <input type="radio" name="monitor_needed" value="0" checked/>关闭
-            <input type="radio" name="monitor_needed" value="1"/>打开
+            <input type="radio" name="monitor_needed" value="0" />关闭
+            <input type="radio" name="monitor_needed" value="1" checked/>打开
         </label>
-
         <br>
-        <button type="button" id="submit">修改</button>
+
+        通知开关：
+        <label>
+            <input type="radio" name="notify_needed" value="0" />关闭
+            <input type="radio" name="notify_needed" value="1" checked/>打开
+        </label>
+        <br>
+        <button type="button" id="submit">修改开关配置</button>
+        <br><br>
+        <button type="button" id="submit_notify">发送测试消息</button>
         <br><br>
 
         <label>
@@ -67,10 +83,9 @@
     </section>
     <br/>
     <br/>
-
     <section style="text-align: center">
         <div id="footer">
-            CopyRight@qiujianzhong
+            CopyRight@<a href="https://github.com/gelove/dingdong">gelove</a>
         </div>
     </section>
 </article>
@@ -81,6 +96,9 @@
     let URL = "";
     $('#submit').click(function () {
       doSet();
+    });
+    $('#submit_notify').click(function () {
+      donotify();
     });
 
     function doSet() {
@@ -97,6 +115,24 @@
         success: function (data) {
           if (data.length === 0) {
             data = "设置失败，请稍后再试！";
+          }
+          $('#result').text(data);
+        },
+        error: function () {
+          $('#result').text("无法连接网络！");
+        }
+      });
+    }
+    function donotify() {
+      $('#result').text("");
+      $.ajax({
+        type: "GET",
+        url: URL + "/notify",
+        data: {
+        },
+        success: function (data) {
+          if (data.length === 0) {
+            data = "通知失败，请稍后再试！";
           }
           $('#result').text(data);
         },
