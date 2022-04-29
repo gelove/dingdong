@@ -11,6 +11,7 @@ import (
 	"dingdong/assets"
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
+	"dingdong/internal/app/service"
 	"dingdong/internal/app/service/notify"
 	"dingdong/pkg/json"
 	"dingdong/pkg/yaml"
@@ -57,10 +58,17 @@ func GetAddress(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, err.Error()+"\n")
 		return
 	}
-	_, err = io.WriteString(w, json.MustEncodeToString(list)+"\n")
+	_, _ = io.WriteString(w, json.MustEncodeToString(list)+"\n")
+}
+
+// AddOrder 提交订单
+func AddOrder(w http.ResponseWriter, _ *http.Request) {
+	err := service.AddOrder()
 	if err != nil {
-		log.Println("io.WriteString error =>", err)
+		_, _ = io.WriteString(w, err.Error()+"\n")
+		return
 	}
+	_, _ = io.WriteString(w, "创建订单成功\n")
 }
 
 // SetConfig 通过接口更新配置并重载配置

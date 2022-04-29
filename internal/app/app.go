@@ -22,6 +22,7 @@ func Run() {
 	http.HandleFunc("/config", api.ConfigView)
 	http.HandleFunc("/notify", api.Notify)
 	http.HandleFunc("/address", api.GetAddress)
+	http.HandleFunc("/addOrder", api.AddOrder)
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.FS))))
 
 	conf := config.Get()
@@ -43,14 +44,15 @@ func isPeak() bool {
 func Monitor() {
 	cartMap := service.MockCartMap()
 	for {
-		conf := config.Get()
 		<-time.After(time.Second)
+		conf := config.Get()
 		// duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
 		if !conf.MonitorNeeded && !conf.PickUpNeeded {
 			continue
 		}
+		// 每5分钟第1秒运行一次
 		now := time.Now()
-		if now.Second() != 1 {
+		if now.Minute()%5 != 0 || now.Second() != 1 {
 			continue
 		}
 		if isPeak() {

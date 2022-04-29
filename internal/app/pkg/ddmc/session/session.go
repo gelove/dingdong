@@ -93,7 +93,7 @@ func retryInterval(resp *req.Response, attempt int) time.Duration {
 
 func retryHook(resp *req.Response, err error) {
 	if err != nil {
-		log.Println("Request error =>", err.Error())
+		log.Printf("Request error => %+v", err)
 	}
 	r := resp.Request.RawRequest
 	log.Println("Retry request =>", r.Method, r.URL)
@@ -129,7 +129,7 @@ func chooseAddr() {
 
 	options := make([]string, 0, len(addrList))
 	for _, v := range addrList {
-		options = append(options, fmt.Sprintf("%s %s %s", v.Location.Address, v.Location.Name, v.AddrDetail))
+		options = append(options, fmt.Sprintf("%s %s %s %s", v.Location.Address, v.Location.Name, v.AddrDetail, v.StationName))
 	}
 
 	var addr string
@@ -144,7 +144,7 @@ func chooseAddr() {
 	index := textual.IndexOf(addr, options)
 	s.Address = addrList[index]
 	log.Printf("Address => %#v", s.Address)
-	log.Printf("已选择收货地址: %s %s %s", s.Address.Location.Address, s.Address.Location.Name, s.Address.AddrDetail)
+	log.Printf("已选择收货地址: %s %s %s %s", s.Address.Location.Address, s.Address.Location.Name, s.Address.AddrDetail, s.Address.StationName)
 	return
 }
 

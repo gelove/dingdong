@@ -75,18 +75,19 @@ func TestGetCart(t *testing.T) {
 func TestGetMultiReserveTime(t *testing.T) {
 	cartMap := service.MockCartMap()
 	now := time.Now()
-	times, err := service.GetMultiReserveTime(cartMap)
+	reserveTimes, err := service.GetMultiReserveTime(cartMap)
 	t.Logf("Millisecond => %d ms", time.Now().Sub(now).Milliseconds())
 	if err != nil {
 		t.Error(err)
+		return
 	}
-	t.Log(json.MustEncodePrettyString(times))
+	t.Log(json.MustEncodePrettyString(reserveTimes))
 }
 
 // TestMockMultiReserveTime 模拟运力数据
 func TestMockMultiReserveTime(t *testing.T) {
-	times := service.MockMultiReserveTime()
-	t.Log(json.MustEncodePrettyString(times))
+	reserveTimes := service.MockMultiReserveTime()
+	t.Log(json.MustEncodePrettyString(reserveTimes))
 }
 
 func TestCheckOrder(t *testing.T) {
@@ -95,7 +96,11 @@ func TestCheckOrder(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	reserveTimes := service.MockMultiReserveTime()
+	reserveTimes, err := service.GetMultiReserveTime(cartMap)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
 	if err != nil {
 		t.Error(err)
@@ -105,29 +110,14 @@ func TestCheckOrder(t *testing.T) {
 }
 
 func TestAddNewOrder(t *testing.T) {
-	err := service.AllCheck()
+	err := service.AddOrder()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	cartMap, err := service.GetCart()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	reserveTimes := service.MockMultiReserveTime()
-	orderMap, err := service.CheckOrder(cartMap, reserveTimes)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	err = service.AddNewOrder(cartMap, reserveTimes, orderMap)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	t.Log("Create order success")
 }
 
 func TestSnapUpOnce(t *testing.T) {
-	service.SnapUpOnce()
+	service.SnapUpOnce(service.PickUpMode)
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/ddmc/session"
@@ -36,13 +35,12 @@ func MockMultiReserveTime() *reserve_time.GoTimes {
 	reserveTime := &reserve_time.GoTimes{}
 	halfPastTwoPM := date.TodayUnix(14, 30, 0)
 	now := time.Now().Unix()
-	conf := config.Get()
 	if now >= date.TodayUnix(0, 0, 0) && now <= date.TodayUnix(6, 20, 0) {
 		reserveTime.StartTimestamp = date.TodayUnix(6, 30, 0)
 		reserveTime.EndTimestamp = halfPastTwoPM
 		return reserveTime
 	}
-	if now >= date.SecondSnapUpUnix()-conf.AdvanceTime && now <= date.TodayUnix(8, 50, 0) {
+	if now >= date.TodayUnix(8, 20, 0) && now <= date.TodayUnix(8, 50, 0) {
 		reserveTime.StartTimestamp = halfPastTwoPM
 		reserveTime.EndTimestamp = date.TodayUnix(22, 30, 0)
 		return reserveTime

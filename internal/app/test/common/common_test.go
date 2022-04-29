@@ -2,6 +2,7 @@ package common
 
 import (
 	"testing"
+	"time"
 
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/date"
@@ -29,6 +30,12 @@ func BenchmarkSnapUpTime(b *testing.B) {
 }
 
 func TestError(t *testing.T) {
+	err1 := errs.Wrap(code.Unexpected, errs.Wrap(code.InvalidResponse, errs.New(code.ReserveTimeIsDisabled)))
+	t.Log(err1.Error())
+	t.Log(err1.Message())
+	err2 := errs.Wrap(code.Unexpected, errs.WithMessage(code.InvalidResponse, "提交订单失败"))
+	t.Logf("%#v", err2)
+
 	err := errs.New(code.ReserveTimeIsDisabled)
 	second := errs.New(code.ReserveTimeIsDisabled)
 	if !errs.As(err, &second) {
@@ -36,6 +43,17 @@ func TestError(t *testing.T) {
 		return
 	}
 	t.Log("error is equal")
+}
+
+func TestTimer(t *testing.T) {
+	go func() {
+		for {
+			t.Log("timer =>", time.Now().Second())
+			time.Sleep(time.Second)
+		}
+	}()
+	<-time.After(time.Duration(60-1-time.Now().Second()) * time.Second)
+	t.Log("timer finished")
 }
 
 func TestJsonGet(t *testing.T) {

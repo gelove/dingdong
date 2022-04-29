@@ -20,6 +20,7 @@ import (
 const (
 	FirstSnapUp = iota + 1
 	SecondSnapUp
+	PickUpMode
 )
 
 const (
@@ -199,7 +200,6 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
-			t.MockMultiReserveTime() // 更新配送时段
 			duration := durationMinMillis + rand.Intn(durationGapMillis)
 			checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
 			if err != nil {
@@ -227,11 +227,11 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
-			t.MockMultiReserveTime() // 更新配送时段
 			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 			if err != nil {
 				_err := errs.New(code.ReserveTimeIsDisabled)
 				if !errs.As(err, &_err) {
+					t.Finished()
 					return
 				}
 				log.Println(err)
@@ -256,30 +256,29 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 	}
 }
 
-func timeTrigger() bool {
+func timeTrigger() int {
 	conf := config.Get()
 	now := time.Now()
 	firstTime := date.FirstSnapUpUnix()
 	// log.Println(conf.SnapUp&FirstSnapUp == FirstSnapUp, now, firstTime, now.Unix(), firstTime)
 	if conf.SnapUp&FirstSnapUp == FirstSnapUp && now.Unix() == firstTime-conf.AdvanceTime {
 		log.Println("===== 6点抢购开始 =====")
-		return true
+		return FirstSnapUp
 	}
 	secondTime := date.SecondSnapUpUnix()
 	// log.Println(conf.SnapUp&SecondSnapUp == SecondSnapUp, now, secondTime, now.Unix(), secondTime)
 	if conf.SnapUp&SecondSnapUp == SecondSnapUp && now.Unix() == secondTime-conf.AdvanceTime {
 		log.Println("===== 8点半抢购开始 =====")
-		return true
+		return SecondSnapUp
 	}
-	return false
+	return 0
 }
 
-func SnapUpOnce() {
+func SnapUpOnce(mode int) {
 	conf := config.Get()
 	wg := new(sync.WaitGroup)
 	task := NewTask()
 	defer task.Finished()
-	task.MockMultiReserveTime() // 模拟配送时段
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
 		wg.Add(1)
@@ -291,13 +290,26 @@ func SnapUpOnce() {
 		go task.GetCart(wg)
 	}
 
+	if mode == PickUpMode {
+		for i := 0; i < conf.BaseConcurrency; i++ {
+			wg.Add(1)
+			go task.GetMultiReserveTime(wg)
+		}
+	}
+
+	if mode == FirstSnapUp || mode == SecondSnapUp {
+		task.MockMultiReserveTime() // 更新配送时段
+	}
+
 	for i := 0; i < conf.BaseConcurrency; i++ {
 		wg.Add(1)
 		go task.CheckOrder(wg)
 	}
 
-	// 提前1秒开始提交订单, 提前太早有可能被风控
-	// <-time.After(time.Duration(60-1-time.Now().Second()) * time.Second)
+	// 只提前2秒开始提交订单, 提前太早有可能被风控
+	if mode == FirstSnapUp || mode == SecondSnapUp {
+		<-time.After(time.Duration(60-2-time.Now().Second()) * time.Second)
+	}
 	for i := 0; i < conf.SubmitConcurrency; i++ {
 		wg.Add(1)
 		go task.AddNewOrder(wg)
@@ -312,8 +324,9 @@ func SnapUp() {
 	for {
 		select {
 		case <-timer:
-			if timeTrigger() {
-				go SnapUpOnce()
+			mode := timeTrigger()
+			if mode > 0 {
+				go SnapUpOnce(mode)
 			}
 		}
 	}
@@ -323,7 +336,7 @@ func SnapUp() {
 func PickUp() {
 	for {
 		<-pickUpCh
-		SnapUpOnce()
+		SnapUpOnce(PickUpMode)
 	}
 }
 
@@ -394,4 +407,24 @@ func Notify() {
 		}
 		wg.Wait()
 	}
+}
+
+func AddOrder() error {
+	err := AllCheck()
+	if err != nil {
+		return err
+	}
+	cartMap, err := GetCart()
+	if err != nil {
+		return err
+	}
+	reserveTimes, err := GetMultiReserveTime(cartMap)
+	if err != nil {
+		return err
+	}
+	orderMap, err := CheckOrder(cartMap, reserveTimes)
+	if err != nil {
+		return err
+	}
+	return AddNewOrder(cartMap, reserveTimes, orderMap)
 }

@@ -34,10 +34,5 @@ func GetAddress() ([]address.Item, error) {
 		return nil, errs.New(code.NoValidAddress)
 	}
 
-	// res := make(map[string]address.Item)
-	// for _, v := range result.Data.Valid {
-	// 	str := fmt.Sprintf("%s %s %s", v.UserName, v.Location.Address, v.AddrDetail)
-	// 	res[str] = v
-	// }
 	return result.Data.Valid, nil
 }

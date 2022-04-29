@@ -25,36 +25,38 @@ type ErrorImpl struct {
 }
 
 // Unwrap 获取内部错误
-func (e ErrorImpl) Unwrap() error {
+func (e *ErrorImpl) Unwrap() error {
 	return e.error
 }
 
-func (e ErrorImpl) Code() code.ErrorCode {
+func (e *ErrorImpl) Code() code.ErrorCode {
 	return e.code
 }
 
-func (e ErrorImpl) Error() string {
-	if e.error == nil {
-		return e.code.String()
-	}
-	return e.code.String() + " " + e.error.Error()
-}
-
-func (e ErrorImpl) Message() string {
+func (e *ErrorImpl) Message() string {
 	// 不要注释这里的代码, 运行前请先执行 make generate
 	return e.code.String()
 }
 
-func (e ErrorImpl) CodeEqual(code code.ErrorCode) bool {
+func (e *ErrorImpl) Error() string {
+	return fmt.Sprintf("%v", e)
+}
+
+func (e *ErrorImpl) CodeEqual(code code.ErrorCode) bool {
 	return e.code == code
 }
 
 // Format 格式化打印
-func (e ErrorImpl) Format(f fmt.State, verb rune) {
+func (e *ErrorImpl) Format(f fmt.State, verb rune) {
+	_, _ = io.WriteString(f, e.Message())
+	if e.error == nil {
+		return
+	}
+	_, _ = io.WriteString(f, " ")
 	if v, ok := e.error.(fmt.Formatter); ok {
 		v.Format(f, verb)
 	} else {
-		_, _ = io.WriteString(f, e.Error())
+		_, _ = io.WriteString(f, e.error.Error())
 	}
 }
 
