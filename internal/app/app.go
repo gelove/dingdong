@@ -35,9 +35,6 @@ func Run() {
 
 func isPeak() bool {
 	now := time.Now()
-	if now.Hour() >= 22 {
-		return true
-	}
 	if now.Hour() >= 0 && now.Hour() < 6 {
 		return true
 	}
@@ -47,7 +44,7 @@ func isPeak() bool {
 	if now.Hour() == 8 && now.Minute() < 40 {
 		return true
 	}
-	if now.Hour() == 12 && now.Minute() < 15 {
+	if now.Hour() >= 22 {
 		return true
 	}
 	return false
