@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -34,7 +35,19 @@ func Run() {
 
 func isPeak() bool {
 	now := time.Now()
-	if now.Hour() >= 0 && now.Hour() < 9 {
+	if now.Hour() >= 22 {
+		return true
+	}
+	if now.Hour() >= 0 && now.Hour() < 6 {
+		return true
+	}
+	if now.Hour() == 6 && now.Minute() < 10 {
+		return true
+	}
+	if now.Hour() == 8 && now.Minute() < 40 {
+		return true
+	}
+	if now.Hour() == 12 && now.Minute() < 15 {
 		return true
 	}
 	return false
@@ -50,11 +63,13 @@ func Monitor() {
 		if !conf.MonitorNeeded && !conf.PickUpNeeded {
 			continue
 		}
-		// 每5分钟第1秒运行一次
 		now := time.Now()
-		if now.Minute()%5 != 0 || now.Second() != 1 {
+		if now.Second() != 0 {
 			continue
 		}
+		// 每分钟在第1-3秒运行一次
+		random := rand.Intn(3) + 1
+		<-time.After(time.Second * time.Duration(random))
 		if isPeak() {
 			log.Println("当前高峰期或暂未营业")
 			continue

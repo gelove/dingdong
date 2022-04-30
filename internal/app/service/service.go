@@ -310,6 +310,7 @@ func SnapUpOnce(mode int) {
 	if mode == FirstSnapUp || mode == SecondSnapUp {
 		<-time.After(time.Duration(60-2-time.Now().Second()) * time.Second)
 	}
+	log.Println("===== 准备提交订单 =====")
 	for i := 0; i < conf.SubmitConcurrency; i++ {
 		wg.Add(1)
 		go task.AddNewOrder(wg)
