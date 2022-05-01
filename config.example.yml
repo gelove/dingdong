@@ -11,7 +11,7 @@ dingdong:
   snap_up: 0 # 抢购, 0 关闭, 1 六点抢, 2 八点半抢, 3 六点和八点半都抢
   advance_time: 20 # 抢购提前进入时间, 单位:秒, 默认为20秒
   pick_up_needed: false # 闲时捡漏开关, false 关闭, true 打开, 在抢购高峰期之外的时间捡漏
-  monitor_needed: true # 监听开关, 监听是否有可配送时段
+  monitor_needed: true # 监听开关, 监听是否有可运力
   monitor_success_wait: 10 # 成功监听(发起捡漏或通知)之后的休息时间, 单位:分钟, 默认为10分钟
   notify_needed: true # 通知开关, 发现运力时或捡漏成功时的通知, 使用需同时打开监听或捡漏
   audio_needed: true # 播放音频开关, 在订单提交成功后播放音频

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"net/http"
@@ -18,9 +19,9 @@ var (
 	merTuanNotifyCh  = make(chan struct{})
 )
 
-func Run() {
-	go service.SnapUp()
-	go service.PickUp(pickUpCh)
+func Run(ctx context.Context) {
+	go service.SnapUp(ctx)
+	go service.PickUp(ctx, pickUpCh)
 	go service.DingDongNotify(dingDongNotifyCh)
 	go service.MeiTuanNotify(merTuanNotifyCh)
 

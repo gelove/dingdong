@@ -25,9 +25,9 @@ type DingDong struct {
 	SnapUp             int               `yaml:"snap_up"`              // 抢购开关 0: 关 1: 6点抢 2: 8点半抢 3: 6点和8点半都抢
 	AdvanceTime        int64             `yaml:"advance_time"`         // 抢购提前进入时间 单位:秒
 	PickUpNeeded       bool              `yaml:"pick_up_needed"`       // 闲时捡漏开关
-	MonitorNeeded      bool              `yaml:"monitor_needed"`       // 监视器开关 监视是否有可配送时段
+	MonitorNeeded      bool              `yaml:"monitor_needed"`       // 监视器开关 监视是否有运力
 	MonitorSuccessWait int               `yaml:"monitor_success_wait"` // 成功监听(发起捡漏或通知)之后的休息时间 单位:分钟
-	NotifyNeeded       bool              `yaml:"notify_needed"`        // 通知开关 发现有可配送时段时通知大家有可购商品
+	NotifyNeeded       bool              `yaml:"notify_needed"`        // 通知开关 发现有运力时通知大家有可购商品
 	AudioNeeded        bool              `yaml:"audio_needed"`         // 播放音频开关 在下单成功后播放音频
 	PayType            int               `yaml:"pay_type"`             // 支付类型
 	Headers            map[string]string `yaml:"headers"`              // 请求头
@@ -37,8 +37,8 @@ type DingDong struct {
 
 type MeiTuan struct {
 	Station            string `yaml:"station"`              // 美团站点
-	NotifyNeeded       bool   `yaml:"notify_needed"`        // 通知开关 发现有可配送时段时通知大家有可购商品
-	MonitorNeeded      bool   `yaml:"monitor_needed"`       // 监视器开关 监视是否有可配送时段
+	NotifyNeeded       bool   `yaml:"notify_needed"`        // 通知开关 发现有运力时通知大家有可购商品
+	MonitorNeeded      bool   `yaml:"monitor_needed"`       // 监视器开关 监视是否有运力
 	MonitorSuccessWait int    `yaml:"monitor_success_wait"` // 成功监听(发起捡漏或通知)之后的休息时间 单位:分钟
 }
 

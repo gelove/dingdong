@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"os"
+	"os/signal"
 	"time"
 
 	"dingdong/internal/app"
@@ -30,5 +32,14 @@ func main() {
 	config.Initialize(dir + "/config.yml")
 	session.Initialize()
 
-	app.Run()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		s := <-c
+		log.Printf("Got signal: %+v", s)
+		cancel()
+	}()
+
+	app.Run(ctx)
 }

@@ -32,6 +32,7 @@ const (
 
 type Task struct {
 	sync.RWMutex
+	sync.WaitGroup
 	timeOut       context.Context
 	Finished      context.CancelFunc
 	completed     bool
@@ -104,8 +105,8 @@ func (t *Task) SetCheckOrderMap(checkOrderMap map[string]interface{}) *Task {
 }
 
 // AllCheck 不一定需要, 只起补充作用
-func (t *Task) AllCheck(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (t *Task) AllCheck() {
+	defer t.Done()
 	for {
 		select {
 		case <-t.timeOut.Done():
@@ -125,8 +126,8 @@ func (t *Task) AllCheck(wg *sync.WaitGroup) {
 	}
 }
 
-func (t *Task) GetCart(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (t *Task) GetCart() {
+	defer t.Done()
 	for {
 		select {
 		case <-t.timeOut.Done():
@@ -152,8 +153,8 @@ func (t *Task) GetCart(wg *sync.WaitGroup) {
 	}
 }
 
-func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (t *Task) GetMultiReserveTime() {
+	defer t.Done()
 	for {
 		select {
 		case <-t.timeOut.Done():
@@ -172,7 +173,7 @@ func (t *Task) GetMultiReserveTime(wg *sync.WaitGroup) {
 				continue
 			}
 			t.SetReserveTime(reserveTime)
-			log.Println("===== 有效配送时段已更新 =====")
+			log.Println("===== 有效运力时段已更新 =====")
 			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
 			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
@@ -184,8 +185,8 @@ func (t *Task) MockMultiReserveTime() {
 	t.SetReserveTime(reserveTime)
 }
 
-func (t *Task) CheckOrder(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (t *Task) CheckOrder() {
+	defer t.Done()
 	for {
 		select {
 		case <-t.timeOut.Done():
@@ -210,8 +211,8 @@ func (t *Task) CheckOrder(wg *sync.WaitGroup) {
 	}
 }
 
-func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (t *Task) AddNewOrder() {
+	defer t.Done()
 
 	for {
 		select {
@@ -273,34 +274,34 @@ func timeTrigger() int {
 
 func SnapUpOnce(mode int) {
 	conf := config.GetDingDong()
-	wg := new(sync.WaitGroup)
+	// wg := new(sync.WaitGroup)
 	task := NewTask()
 	defer task.Finished()
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
-		wg.Add(1)
-		go task.AllCheck(wg)
+		task.Add(1)
+		go task.AllCheck()
 	}
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
-		wg.Add(1)
-		go task.GetCart(wg)
+		task.Add(1)
+		go task.GetCart()
 	}
 
 	if mode == PickUpMode {
 		for i := 0; i < conf.BaseConcurrency; i++ {
-			wg.Add(1)
-			go task.GetMultiReserveTime(wg)
+			task.Add(1)
+			go task.GetMultiReserveTime()
 		}
 	}
 
 	if mode == FirstSnapUp || mode == SecondSnapUp {
-		task.MockMultiReserveTime() // 更新配送时段
+		task.MockMultiReserveTime() // 更新运力
 	}
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
-		wg.Add(1)
-		go task.CheckOrder(wg)
+		task.Add(1)
+		go task.CheckOrder()
 	}
 
 	submitConcurrency := 1
@@ -310,18 +311,21 @@ func SnapUpOnce(mode int) {
 		<-time.After(time.Duration(60-2-time.Now().Second()) * time.Second)
 	}
 	for i := 0; i < submitConcurrency; i++ {
-		wg.Add(1)
-		go task.AddNewOrder(wg)
+		task.Add(1)
+		go task.AddNewOrder()
 	}
 
-	wg.Wait()
+	task.Wait()
 }
 
 // SnapUp 抢购
-func SnapUp() {
+func SnapUp(ctx context.Context) {
 	timer := time.Tick(time.Second)
 	for {
 		select {
+		case <-ctx.Done():
+			log.Println("SnapUp force stopped")
+			return
 		case <-timer:
 			mode := timeTrigger()
 			if mode > 0 {
@@ -332,10 +336,16 @@ func SnapUp() {
 }
 
 // PickUp 捡漏
-func PickUp(pickUpCh <-chan struct{}) {
+func PickUp(ctx context.Context, pickUpCh <-chan struct{}) {
 	for {
-		<-pickUpCh
-		SnapUpOnce(PickUpMode)
+		select {
+		case <-ctx.Done():
+			log.Println("PickUp force stopped")
+			return
+		case <-pickUpCh:
+			go SnapUpOnce(PickUpMode)
+		}
+
 	}
 }
 
@@ -384,22 +394,9 @@ func DingDongNotify(notifyCh <-chan struct{}) {
 		}
 		products := strings.Join(productNames, " ")
 
-		Notify(fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
+		Notify(fmt.Sprintf("叮咚买菜当前有运力请尽快下单[%s%s]", products, ellipsis))
 	}
 }
-
-/*
-{
-	"code": 0,
-	"data": {
-		"msg": "每日6:00开放下单，当前不在可下单时段",
-		"type": 0,
-		"backColor": "#FFF6E0",
-		"fontColor": "#A5571C",
-		"cycleType": 2
-	}
-}
-*/
 
 func MeiTuanMonitorAndNotify(notifyCh chan<- struct{}) {
 	result, err := meituan.GetMultiReserveTime()
@@ -423,7 +420,7 @@ func MeiTuanMonitorAndNotify(notifyCh chan<- struct{}) {
 func MeiTuanNotify(notifyCh <-chan struct{}) {
 	for {
 		<-notifyCh
-		Notify("美团买菜当前可配送请尽快下单")
+		Notify("美团买菜当前有运力请尽快下单")
 	}
 }
 

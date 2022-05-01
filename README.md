@@ -93,7 +93,19 @@ GET 请求 localhost:9999/set
 
 ### 当有运力时, 发送通知到手机
 
-### 安卓手机接收通知
+### 苹果手机接收通知
+
+#### 1.安装 bark 得到自己的 barkID (下图红框中), 并将其粘贴到配置文件的 "bark" 字段下
+
+![bark](https://github.com/gelove/dingdong/blob/main/assets/image/user.jpeg)
+
+#### 2.配置文件中 "bark" 字段为一组需要通知的 bark token
+
+#### 3.bark 需打开允许通知
+
+![notify](https://github.com/gelove/dingdong/blob/main/assets/image/notify.jpeg)
+
+### 安卓或苹果手机通过微信接收通知
 
 #### 微信上关注 "pushplus 推送加" 公众号
 
@@ -106,18 +118,6 @@ GET 请求 localhost:9999/set
 #### 点击 <kbd>开发设置</kbd>, 点击 <kbd>Token</kbd> 并一键复制
 
 #### 粘贴 Token 到配置文件的 "push_plus" 下
-
-### 苹果手机接收通知
-
-#### 1.安装 bark 得到自己的 barkID (下图红框中), 并将其粘贴到配置文件的 "bark" 字段下
-
-![bark](https://github.com/gelove/dingdong/blob/main/assets/image/user.jpeg)
-
-#### 2.配置文件中 "bark" 字段为一组需要通知的 bark token
-
-#### 3.bark 需打开允许通知
-
-![notify](https://github.com/gelove/dingdong/blob/main/assets/image/notify.jpeg)
 
 ## 打包
 
