@@ -11,7 +11,7 @@ const (
 	AssertFailed                                  // 断言失败
 	ParseFailed                                   // 解析失败
 	RequestFailed                                 // 请求失败
-	InvalidResponse                               // 无效的响应
+	ResponseError                                 // 响应错误
 	GetAddressFailed                              // 获取收货地址失败
 	SelectAddressFailed                           // 选择收货地址错误
 	NoValidAddress                                // 当前没有可用的收货地址

@@ -34,7 +34,7 @@ func GetHomeFlowDetail() ([]flow_detail.Item, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "获取首页失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "获取首页失败 => "+json.MustEncodeToString(result))
 	}
 	return result.Data.List, nil
 }

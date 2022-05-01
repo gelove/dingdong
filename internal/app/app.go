@@ -12,11 +12,20 @@ import (
 	"dingdong/internal/app/service"
 )
 
+var (
+	pickUpCh         = make(chan struct{})
+	dingDongNotifyCh = make(chan struct{})
+	merTuanNotifyCh  = make(chan struct{})
+)
+
 func Run() {
-	go Monitor()
 	go service.SnapUp()
-	go service.PickUp()
-	go service.Notify()
+	go service.PickUp(pickUpCh)
+	go service.DingDongNotify(dingDongNotifyCh)
+	go service.MeiTuanNotify(merTuanNotifyCh)
+
+	go DingDongMonitor(dingDongNotifyCh, pickUpCh)
+	go MeiTuanMonitor(merTuanNotifyCh)
 
 	http.HandleFunc("/", api.ConfigView)
 	http.HandleFunc("/set", api.SetConfig)
@@ -33,30 +42,12 @@ func Run() {
 	}
 }
 
-func isPeak() bool {
-	now := time.Now()
-	if now.Hour() >= 0 && now.Hour() < 6 {
-		return true
-	}
-	if now.Hour() == 6 && now.Minute() < 10 {
-		return true
-	}
-	if now.Hour() == 8 && now.Minute() < 40 {
-		return true
-	}
-	if now.Hour() >= 22 {
-		return true
-	}
-	return false
-}
-
-// Monitor 监视器 监听运力
-func Monitor() {
+// DingDongMonitor 监视器 监听运力
+func DingDongMonitor(notifyCh chan<- struct{}, pickUpCh chan<- struct{}) {
 	cartMap := service.MockCartMap()
 	for {
 		<-time.After(time.Second)
-		conf := config.Get()
-		// duration := conf.MonitorIntervalMin + rand.Intn(conf.MonitorIntervalMax-conf.MonitorIntervalMin)
+		conf := config.GetDingDong()
 		if !conf.MonitorNeeded && !conf.PickUpNeeded {
 			continue
 		}
@@ -67,11 +58,63 @@ func Monitor() {
 		// 每分钟在第1-3秒运行一次
 		random := rand.Intn(3) + 1
 		<-time.After(time.Second * time.Duration(random))
-		if isPeak() {
-			log.Println("当前高峰期或暂未营业")
+		if dingDongIsPeak() {
+			log.Println("叮咚当前高峰期或暂未营业")
 			continue
 		}
-		service.MonitorAndPickUp(cartMap)
-		// <-time.After(time.Duration(duration) * time.Second)
+		service.MonitorAndPickUp(cartMap, notifyCh, pickUpCh)
 	}
+}
+
+func dingDongIsPeak() bool {
+	now := time.Now()
+	if now.Hour() >= 0 && now.Hour() < 6 {
+		return true
+	}
+	if now.Hour() == 6 && now.Minute() < 15 {
+		return true
+	}
+	if now.Hour() == 8 && now.Minute() < 45 {
+		return true
+	}
+	if now.Hour() >= 22 {
+		return true
+	}
+	return false
+}
+
+func MeiTuanMonitor(notifyCh chan<- struct{}) {
+	for {
+		conf := config.GetMeiTuan()
+		if !conf.MonitorNeeded {
+			<-time.After(time.Second)
+			continue
+		}
+		now := time.Now()
+		if now.Second() != 0 {
+			continue
+		}
+		// 每分钟在第1-3秒运行一次
+		random := rand.Intn(3) + 1
+		<-time.After(time.Second * time.Duration(random))
+		if meiTuanIsPeak() {
+			log.Println("美团当前高峰期或暂未营业")
+			continue
+		}
+		service.MeiTuanMonitorAndNotify(notifyCh)
+	}
+}
+
+func meiTuanIsPeak() bool {
+	now := time.Now()
+	if now.Hour() >= 0 && now.Hour() < 6 {
+		return true
+	}
+	if now.Hour() == 6 && now.Minute() < 15 {
+		return true
+	}
+	if now.Hour() >= 22 {
+		return true
+	}
+	return false
 }

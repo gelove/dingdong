@@ -7,6 +7,7 @@ import (
 	_ "dingdong/internal/app/config"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/service"
+	"dingdong/internal/app/service/meituan"
 	"dingdong/pkg/js"
 	"dingdong/pkg/json"
 )
@@ -25,6 +26,15 @@ func TestJsCall(t *testing.T) {
 	// nars 对应就可以
 	// sesi 可以不用管, 依赖 nars 与 一个随机字符串, 每次计算应都不同, 但是在JS虚拟机中伪随机数似乎不变, 每次都会得到同一个值
 	t.Log("value =>", res.String())
+}
+
+func TestMeiTuanReserveTime(t *testing.T) {
+	res, err := meituan.GetMultiReserveTime()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(json.MustEncodePrettyString(res))
 }
 
 func TestGetHomeFlowDetail(t *testing.T) {

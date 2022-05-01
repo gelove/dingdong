@@ -14,6 +14,7 @@ import (
 	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
+	"dingdong/internal/app/service/meituan"
 	"dingdong/internal/app/service/notify"
 )
 
@@ -29,11 +30,6 @@ const (
 	durationGapMillis = durationMaxMillis - durationMinMillis
 )
 
-var (
-	notifyCh = make(chan struct{})
-	pickUpCh = make(chan struct{})
-)
-
 type Task struct {
 	sync.RWMutex
 	timeOut       context.Context
@@ -45,7 +41,7 @@ type Task struct {
 }
 
 func NewTask() *Task {
-	timeOut, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	timeOut, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	return &Task{timeOut: timeOut, Finished: cancel}
 }
 
@@ -227,6 +223,7 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
+			log.Println("===== 准备提交订单 =====")
 			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
 			if err != nil {
 				_err := errs.New(code.ReserveTimeIsDisabled)
@@ -242,13 +239,13 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 			detail := "已成功下单, 请尽快完成支付"
 			log.Println(detail)
 			conf := config.Get()
-			if conf.NotifyNeeded && len(conf.Bark) > 0 {
+			if conf.DingDong.NotifyNeeded && len(conf.Bark) > 0 {
 				go notify.Push(conf.Bark[0], detail)
 			}
-			if conf.NotifyNeeded && len(conf.PushPlus) > 0 {
+			if conf.DingDong.NotifyNeeded && len(conf.PushPlus) > 0 {
 				go notify.PushPlus(conf.PushPlus[0], detail)
 			}
-			if conf.AudioNeeded {
+			if conf.DingDong.AudioNeeded {
 				go notify.PlayMp3()
 			}
 			t.Finished()
@@ -257,7 +254,7 @@ func (t *Task) AddNewOrder(wg *sync.WaitGroup) {
 }
 
 func timeTrigger() int {
-	conf := config.Get()
+	conf := config.GetDingDong()
 	now := time.Now()
 	firstTime := date.FirstSnapUpUnix()
 	// log.Println(conf.SnapUp&FirstSnapUp == FirstSnapUp, now, firstTime, now.Unix(), firstTime)
@@ -275,7 +272,7 @@ func timeTrigger() int {
 }
 
 func SnapUpOnce(mode int) {
-	conf := config.Get()
+	conf := config.GetDingDong()
 	wg := new(sync.WaitGroup)
 	task := NewTask()
 	defer task.Finished()
@@ -306,12 +303,13 @@ func SnapUpOnce(mode int) {
 		go task.CheckOrder(wg)
 	}
 
+	submitConcurrency := 1
 	// 只提前2秒开始提交订单, 提前太早有可能被风控
 	if mode == FirstSnapUp || mode == SecondSnapUp {
+		submitConcurrency = conf.SubmitConcurrency
 		<-time.After(time.Duration(60-2-time.Now().Second()) * time.Second)
 	}
-	log.Println("===== 准备提交订单 =====")
-	for i := 0; i < conf.SubmitConcurrency; i++ {
+	for i := 0; i < submitConcurrency; i++ {
 		wg.Add(1)
 		go task.AddNewOrder(wg)
 	}
@@ -334,21 +332,21 @@ func SnapUp() {
 }
 
 // PickUp 捡漏
-func PickUp() {
+func PickUp(pickUpCh <-chan struct{}) {
 	for {
 		<-pickUpCh
 		SnapUpOnce(PickUpMode)
 	}
 }
 
-func MonitorAndPickUp(cartMap map[string]interface{}) {
+func MonitorAndPickUp(cartMap map[string]interface{}, notifyCh chan<- struct{}, pickUpCh chan<- struct{}) {
 	_, err := GetMultiReserveTime(cartMap)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	conf := config.Get()
+	conf := config.GetDingDong()
 	if conf.PickUpNeeded {
 		pickUpCh <- struct{}{}
 	}
@@ -360,10 +358,9 @@ func MonitorAndPickUp(cartMap map[string]interface{}) {
 	<-time.After(time.Duration(conf.MonitorSuccessWait) * time.Minute)
 }
 
-func Notify() {
+func DingDongNotify(notifyCh <-chan struct{}) {
 	for {
 		<-notifyCh
-		conf := config.Get()
 		list, err := GetHomeFlowDetail()
 		if err != nil {
 			log.Printf("获取首页产品失败 => %+v", err)
@@ -380,34 +377,80 @@ func Notify() {
 			}
 			productNames = append(productNames, string(letter))
 		}
+
 		ellipsis := ""
 		if len(list) >= 10 {
 			ellipsis = "..."
 		}
 		products := strings.Join(productNames, " ")
-		wg := new(sync.WaitGroup)
-		for _, v := range conf.Bark {
-			if v == "" {
-				continue
-			}
-			wg.Add(1)
-			go func(token string) {
-				defer wg.Done()
-				notify.Push(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
-			}(v)
-		}
-		for _, v := range conf.PushPlus {
-			if v == "" {
-				continue
-			}
-			wg.Add(1)
-			go func(token string) {
-				defer wg.Done()
-				notify.PushPlus(token, fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
-			}(v)
-		}
-		wg.Wait()
+
+		Notify(fmt.Sprintf("叮咚买菜当前可配送请尽快下单[%s%s]", products, ellipsis))
 	}
+}
+
+/*
+{
+	"code": 0,
+	"data": {
+		"msg": "每日6:00开放下单，当前不在可下单时段",
+		"type": 0,
+		"backColor": "#FFF6E0",
+		"fontColor": "#A5571C",
+		"cycleType": 2
+	}
+}
+*/
+
+func MeiTuanMonitorAndNotify(notifyCh chan<- struct{}) {
+	result, err := meituan.GetMultiReserveTime()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if result.Data.CycleType != 0 {
+		log.Println("美团 =>", result.Data.Msg)
+		return
+	}
+
+	conf := config.GetMeiTuan()
+	if conf.NotifyNeeded {
+		notifyCh <- struct{}{}
+	}
+
+	<-time.After(time.Duration(conf.MonitorSuccessWait) * time.Minute)
+}
+
+func MeiTuanNotify(notifyCh <-chan struct{}) {
+	for {
+		<-notifyCh
+		Notify("美团买菜当前可配送请尽快下单")
+	}
+}
+
+func Notify(content string) {
+	conf := config.Get()
+	wg := new(sync.WaitGroup)
+	for _, v := range conf.Bark {
+		if v == "" {
+			continue
+		}
+		wg.Add(1)
+		go func(token string) {
+			defer wg.Done()
+			notify.Push(token, content)
+		}(v)
+	}
+	for _, v := range conf.PushPlus {
+		if v == "" {
+			continue
+		}
+		wg.Add(1)
+		go func(token string) {
+			defer wg.Done()
+			notify.PushPlus(token, content)
+		}(v)
+	}
+	wg.Wait()
 }
 
 func AddOrder() error {

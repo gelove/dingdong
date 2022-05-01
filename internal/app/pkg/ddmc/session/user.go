@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"dingdong/internal/app/config"
-	"dingdong/internal/app/dto/user"
+	"dingdong/internal/app/dto/user_dto"
 	"dingdong/internal/app/pkg/errs"
 	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/json"
 )
 
 func GetUserHeader() map[string]string {
-	h := config.Get().Headers
+	h := config.GetDingDong().Headers
 	headers := map[string]string{
 		"Host":            "sunquan.api.ddxq.mobi",
 		"Content-Type":    "application/x-www-form-urlencoded",
@@ -51,14 +51,14 @@ func GetUserParams(headers map[string]string) map[string]string {
 	return params
 }
 
-func GetUser() (*user.Info, error) {
+func GetUser() (*user_dto.Info, error) {
 	api := "https://sunquan.api.ddxq.mobi/api/v1/user/detail/"
 
 	headers := GetUserHeader()
 	params := GetUserParams(headers)
 	params["source_type"] = "mine_page"
 
-	var result user.Result
+	var result user_dto.Result
 	_, err := Client().R().
 		SetHeaders(headers).
 		SetQueryParams(params).
@@ -69,7 +69,7 @@ func GetUser() (*user.Info, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "获取用户信息失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "获取用户信息失败 => "+json.MustEncodeToString(result))
 	}
 
 	log.Printf("获取用户信息成功, id: %s, name: %s", result.Data.UserInfo.ID, result.Data.UserInfo.Name)

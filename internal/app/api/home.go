@@ -28,7 +28,7 @@ func init() {
 }
 
 func ConfigView(w http.ResponseWriter, r *http.Request) {
-	conf := config.Get()
+	conf := config.GetDingDong()
 	err := tmpl.ExecuteTemplate(w, "index.html", map[string]interface{}{"title": "叮咚买菜助手", "conf": conf})
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error()+"\n")
@@ -95,7 +95,7 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.BaseConcurrency = baseConcurrency
+		conf.DingDong.BaseConcurrency = baseConcurrency
 	}
 	if r.Form.Get("submit_concurrency") != "" {
 		submitConcurrency, err := strconv.Atoi(r.Form.Get("submit_concurrency"))
@@ -103,7 +103,7 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.SubmitConcurrency = submitConcurrency
+		conf.DingDong.SubmitConcurrency = submitConcurrency
 	}
 	if r.Form.Get("snap_up") != "" {
 		snapUp, err := strconv.Atoi(r.Form.Get("snap_up"))
@@ -111,7 +111,7 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.SnapUp = snapUp
+		conf.DingDong.SnapUp = snapUp
 	}
 	if r.Form.Get("advance_time") != "" {
 		advanceTime, err := strconv.Atoi(r.Form.Get("advance_time"))
@@ -119,15 +119,15 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.AdvanceTime = int64(advanceTime)
+		conf.DingDong.AdvanceTime = int64(advanceTime)
 	}
 	if r.Form.Get("pick_up_needed") != "" {
 		pickUpNeeded := r.Form.Get("pick_up_needed")
-		conf.PickUpNeeded = pickUpNeeded != "0"
+		conf.DingDong.PickUpNeeded = pickUpNeeded != "0"
 	}
 	if r.Form.Get("monitor_needed") != "" {
 		monitorNeeded := r.Form.Get("monitor_needed")
-		conf.MonitorNeeded = monitorNeeded != "0"
+		conf.DingDong.MonitorNeeded = monitorNeeded != "0"
 	}
 	if r.Form.Get("monitor_success_wait") != "" {
 		monitorSuccessWait, err := strconv.Atoi(r.Form.Get("monitor_success_wait"))
@@ -135,35 +135,15 @@ func SetConfig(w http.ResponseWriter, r *http.Request) {
 			_, _ = io.WriteString(w, err.Error())
 			return
 		}
-		conf.MonitorSuccessWait = monitorSuccessWait
-	}
-	if r.Form.Get("monitor_interval_min") != "" {
-		monitorIntervalMin, err := strconv.Atoi(r.Form.Get("monitor_interval_min"))
-		if err != nil {
-			_, _ = io.WriteString(w, err.Error())
-			return
-		}
-		conf.MonitorIntervalMin = monitorIntervalMin
-	}
-	if r.Form.Get("monitor_interval_max") != "" {
-		monitorIntervalMax, err := strconv.Atoi(r.Form.Get("monitor_interval_max"))
-		if err != nil {
-			_, _ = io.WriteString(w, err.Error())
-			return
-		}
-		if monitorIntervalMax < conf.MonitorIntervalMin {
-			_, _ = io.WriteString(w, "监控间隔最大值不能小于最小值\n")
-			return
-		}
-		conf.MonitorIntervalMax = monitorIntervalMax
+		conf.DingDong.MonitorSuccessWait = monitorSuccessWait
 	}
 	if r.Form.Get("notify_needed") != "" {
 		notifyNeeded := r.Form.Get("notify_needed")
-		conf.NotifyNeeded = notifyNeeded != "0"
+		conf.DingDong.NotifyNeeded = notifyNeeded != "0"
 	}
 	if r.Form.Get("audio_needed") != "" {
 		audioNeeded := r.Form.Get("audio_needed")
-		conf.AudioNeeded = audioNeeded != "0"
+		conf.DingDong.AudioNeeded = audioNeeded != "0"
 	}
 	if r.Form.Get("bark") != "" {
 		list := strings.Split(r.Form.Get("bark"), ",")
@@ -208,12 +188,6 @@ func validParams(r *http.Request) bool {
 		return true
 	}
 	if r.Form.Get("monitor_success_wait") != "" {
-		return true
-	}
-	if r.Form.Get("monitor_interval_min") != "" {
-		return true
-	}
-	if r.Form.Get("monitor_interval_max") != "" {
 		return true
 	}
 	if r.Form.Get("notify_needed") != "" {

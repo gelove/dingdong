@@ -11,6 +11,7 @@ DIR = $(notdir ${CURDIR})
 OS ?= darwin
 # 体系架构 amd64(默认),arm64
 ARCH ?= amd64
+CGO ?= 0
 # 可执行文件扩展名 如果是windows系统则为.exe, 否则为空
 # ${OS:windows=} 表示将变量中的字符串windows替换为空, 如果此时OS值为windows则表达式返回false
 EXT = $(if ${OS:windows=},,.exe)
@@ -33,7 +34,7 @@ generate:
 	go generate ./...
 
 build:
-	CGO_ENABLE=0 GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN}
+	CGO_ENABLE=${CGO} GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-s -w" -a -o ${RELEASE_APP} ${MAIN}
 
 compress:
 	upx ${RELEASE_APP}

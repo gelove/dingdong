@@ -61,7 +61,7 @@ func InitializeMock() {
 			Client: client,
 		}
 
-		mock := config.Get().Mock
+		mock := config.GetDingDong().Mock
 		s.UserID = mock["ddmc-uid"]
 		s.Address = address.Item{
 			Id:         mock["address_id"],
@@ -168,7 +168,7 @@ func GetHeaders() map[string]string {
 		"ddmc-device-id":     "",
 		"user-agent":         "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.18(0x1800123f) NetType/WIFI Language/zh_CN",
 	}
-	h := config.Get().Headers
+	h := config.GetDingDong().Headers
 	// log.Printf("custom headers: %#v", h)
 	for k, v := range h {
 		headers[strings.ToLower(k)] = v
@@ -194,7 +194,7 @@ func GetParams(headers map[string]string) map[string]string {
 		"h5_source":     "",
 		"sharer_uid":    "",
 	}
-	p := config.Get().Params
+	p := config.GetDingDong().Params
 	for k, v := range p {
 		params[k] = v
 	}

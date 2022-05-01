@@ -28,7 +28,7 @@ func GetAddress() ([]address.Item, error) {
 	}
 	// log.Println(resp.String())
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "获取地址失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "获取地址失败 => "+json.MustEncodeToString(result))
 	}
 	if len(result.Data.Valid) == 0 {
 		return nil, errs.New(code.NoValidAddress)
