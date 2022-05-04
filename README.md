@@ -6,6 +6,10 @@
 
 从 [Github Release](https://github.com/gelove/dingdong/releases) 下载对应系统的最新版本
 
+## 5月4日
+
+此版本在叮咚的多次升级下已不可用, 不再维护, 有问题可以进群咨询
+
 ## 4月27日
 
 程序启动后，可以在浏览器打开 <http://localhost:9999/notify> 测试推送通知是否正常
