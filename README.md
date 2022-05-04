@@ -8,7 +8,7 @@
 
 ## 5月4日
 
-此版本在叮咚的多次升级下已不可用, 不再维护, 有问题可以进群咨询
+此版本在叮咚的多次升级下已不可用, 不再维护
 
 ## 4月27日
 
@@ -19,6 +19,34 @@
 **最好用一个账号抢菜, 另一个账号捡漏下单和监听运力**
 
 ## 抢菜
+
+### 获取 Session
+
+**如果无法找到所列出的请求，请参见后文 iOS 设备 Charles 抓包帮助**
+
+1、在iOS设备上启动叮咚买菜APP
+
+2、完成登录
+
+3、启动Charles并完成抓包配置（需要配置SSL抓包）
+
+4、点击“购物车”并刷新
+
+5、在请求中找到https://maicai.api.ddxq.mobi/cart/index
+
+6、右击该请求，选择Export Session，保存到项目 session 文件夹下，文件类型请选择JSON Session File (.chlsj)
+
+### 获取 im_secret
+
+**接续 获取 Session 第三步**
+
+4、点击“我的”并刷新
+
+5、在请求中找到https://sunquan.api.ddxq.mobi/api/v1/user/detail
+
+6、左击该请求，选择Contents选项卡，在下半部分选项卡中选择JSON Text视图
+
+7、找到 user_info 下的 im_secret 字段，复制其值到配置文件中
 
 ### 通过抓包获取叮咚小程序的网络请求, 模仿接口调用, 配置文件中 header 和 form 里的必要参数需要根据自己抓包到的数据进行设置
 
