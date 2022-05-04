@@ -35,7 +35,7 @@ func AllCheck() error {
 		return errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return errs.WithMessage(code.InvalidResponse, "购物车全选失败 => "+json.MustEncodeToString(result))
+		return errs.WithMessage(code.ResponseError, "购物车全选失败 => "+json.MustEncodeToString(result))
 	}
 	return nil
 }
@@ -63,7 +63,7 @@ func GetCart() (map[string]interface{}, error) {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "获取购物车失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "获取购物车失败 => "+json.MustEncodeToString(result))
 	}
 
 	data, ok := result.Data.(map[string]interface{})

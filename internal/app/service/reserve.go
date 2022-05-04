@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"dingdong/internal/app/dto"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/ddmc/session"
@@ -69,20 +70,23 @@ func GetMultiReserveTime(cartMap map[string]interface{}) (*reserve_time.GoTimes,
 		return nil, errs.Wrap(code.SignFailed, err)
 	}
 
-	result := reserve_time.Result{}
-	_, err = session.Client().R().
+	result := new(reserve_time.Result)
+	errMsg := new(dto.ErrorMessage)
+	resp, err := session.Client().R().
 		SetHeaders(headers).
 		SetFormData(form).
-		SetResult(&result).
+		SetResult(result).
+		SetError(errMsg).
 		// SetRetryCount(50).
 		Send(http.MethodPost, api)
 	if err != nil {
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
-	// log.Println("resp =>", resp.String())
-	// log.Println("result =>", json.MustEncodeToString(result))
+	if !resp.IsSuccess() {
+		return nil, errs.WithMessage(code.ResponseError, "获取叮咚运力失败 => "+resp.String())
+	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "获取运力失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "获取叮咚运力失败 => "+json.MustEncodeToString(result))
 	}
 	if len(result.Data) == 0 || len(result.Data[0].Times) == 0 || len(result.Data[0].Times[0].Times) == 0 {
 		return nil, errs.New(code.NoReserveTime)

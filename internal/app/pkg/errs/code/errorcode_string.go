@@ -14,7 +14,7 @@ func _() {
 	_ = x[AssertFailed-1003]
 	_ = x[ParseFailed-1004]
 	_ = x[RequestFailed-1005]
-	_ = x[InvalidResponse-1006]
+	_ = x[ResponseError-1006]
 	_ = x[GetAddressFailed-1007]
 	_ = x[SelectAddressFailed-1008]
 	_ = x[NoValidAddress-1009]
@@ -24,9 +24,9 @@ func _() {
 	_ = x[ReserveTimeIsDisabled-1013]
 }
 
-const _ErrorCode_name = "意外错误数组索引越界签名失败断言失败解析失败请求失败无效的响应获取收货地址失败选择收货地址错误当前没有可用的收货地址当前购物车中没有可购商品当前没有可用的配送时段当前没有可用的配送时段, 请稍后再试您选择的送达时间已经失效, 请重新选择"
+const _ErrorCode_name = "意外错误数组索引越界签名失败断言失败解析失败请求失败响应错误获取收货地址失败选择收货地址错误当前没有可用的收货地址当前购物车中没有可购商品当前没有可用的运力当前没有可用的运力, 请稍后再试您选择的送达时间已经失效, 请重新选择"
 
-var _ErrorCode_index = [...]uint16{0, 12, 30, 42, 54, 66, 78, 93, 117, 141, 174, 210, 243, 293, 346}
+var _ErrorCode_index = [...]uint16{0, 12, 30, 42, 54, 66, 78, 90, 114, 138, 171, 207, 240, 290, 343}
 
 func (i ErrorCode) String() string {
 	i -= 1000

@@ -1,4 +1,4 @@
-package user
+package user_dto
 
 type Result struct {
 	Success bool   `json:"success"`

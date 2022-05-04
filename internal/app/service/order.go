@@ -83,7 +83,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		return nil, errs.Wrap(code.RequestFailed, err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.InvalidResponse, "订单校验失败 => "+json.MustEncodeToString(result))
+		return nil, errs.WithMessage(code.ResponseError, "订单校验失败 => "+json.MustEncodeToString(result))
 	}
 	body, err := resp.ToBytes()
 	if err != nil {
@@ -123,7 +123,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		"coupons_money":          "",
 		"coupons_id":             "",
 	}
-	conf := config.Get()
+	conf := config.GetDingDong()
 	if conf.PayType > 0 {
 		paymentOrder["pay_type"] = conf.PayType
 	}
@@ -195,9 +195,9 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	}
 	if !result.Success {
 		if result.Code == 5004 {
-			return errs.Wrap(code.InvalidResponse, errs.New(code.ReserveTimeIsDisabled))
+			return errs.Wrap(code.ResponseError, errs.New(code.ReserveTimeIsDisabled))
 		}
-		return errs.WithMessage(code.InvalidResponse, "提交订单失败 => "+json.MustEncodeToString(result))
+		return errs.WithMessage(code.ResponseError, "提交订单失败 => "+json.MustEncodeToString(result))
 	}
 	log.Println("恭喜你，已成功下单 =>", resp.String())
 	return nil

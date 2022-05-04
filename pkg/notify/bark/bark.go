@@ -69,7 +69,7 @@ func (b bark) Send() error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errs.WithMessage(code.InvalidResponse, fmt.Sprintf("%d %s", resp.StatusCode, resp.String()))
+		return errs.WithMessage(code.ResponseError, fmt.Sprintf("%d %s", resp.StatusCode, resp.String()))
 	}
 	return nil
 }

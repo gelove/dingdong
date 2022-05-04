@@ -30,10 +30,10 @@ func BenchmarkSnapUpTime(b *testing.B) {
 }
 
 func TestError(t *testing.T) {
-	err1 := errs.Wrap(code.Unexpected, errs.Wrap(code.InvalidResponse, errs.New(code.ReserveTimeIsDisabled)))
+	err1 := errs.Wrap(code.Unexpected, errs.Wrap(code.ResponseError, errs.New(code.ReserveTimeIsDisabled)))
 	t.Log(err1.Error())
 	t.Log(err1.Message())
-	err2 := errs.Wrap(code.Unexpected, errs.WithMessage(code.InvalidResponse, "提交订单失败"))
+	err2 := errs.Wrap(code.Unexpected, errs.WithMessage(code.ResponseError, "提交订单失败"))
 	t.Logf("%#v", err2)
 
 	err := errs.New(code.ReserveTimeIsDisabled)
@@ -57,7 +57,7 @@ func TestTimer(t *testing.T) {
 }
 
 func TestJsonGet(t *testing.T) {
-	conf := config.Get()
+	conf := config.GetDingDong()
 	bs := json.MustEncode(conf)
 	t.Log(json.Get(bs, "headers", "cookie").ToString())
 	t.Log(json.Get(bs, "headers").Get("cookie").ToString())

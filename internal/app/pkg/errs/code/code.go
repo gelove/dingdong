@@ -11,13 +11,13 @@ const (
 	AssertFailed                                  // 断言失败
 	ParseFailed                                   // 解析失败
 	RequestFailed                                 // 请求失败
-	InvalidResponse                               // 无效的响应
+	ResponseError                                 // 响应错误
 	GetAddressFailed                              // 获取收货地址失败
 	SelectAddressFailed                           // 选择收货地址错误
 	NoValidAddress                                // 当前没有可用的收货地址
 	NoValidProduct                                // 当前购物车中没有可购商品
-	NoReserveTime                                 // 当前没有可用的配送时段
-	NoReserveTimeAndRetry                         // 当前没有可用的配送时段, 请稍后再试
+	NoReserveTime                                 // 当前没有可用的运力
+	NoReserveTimeAndRetry                         // 当前没有可用的运力, 请稍后再试
 	ReserveTimeIsDisabled                         // 您选择的送达时间已经失效, 请重新选择
 )
 
