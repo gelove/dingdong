@@ -38,7 +38,7 @@
 
 ### 获取 im_secret
 
-**接续 获取 Session 第三步**
+**接续获取 Session 第三步**
 
 4、点击“我的”并刷新
 
@@ -59,7 +59,8 @@
 
 感谢群友 邱建忠 提供的前端网页
 
-感谢群友 hhhhg~ 提供的教程 <a href="https://github.com/gelove/dingdong/blob/main/assets/doc/安卓抓包方法及Windows端小白教程.docx" target="_blank">安卓抓包方法及Windows端小白教程.docx</a>
+感谢群友 hhhhg~ 提供的教程 
+<a href="https://github.com/gelove/dingdong/blob/main/assets/doc/安卓抓包方法及Windows端小白教程.docx" target="_blank">安卓抓包方法及Windows端小白教程.docx</a>
 
 [Stream 抓包教程(IOS)](https://www.jianshu.com/p/8a0fe2500f24)
 
@@ -170,7 +171,8 @@ make build OS=windows # windows
 
 ### macOS
 
-在终端中执行
+1. 打开终端, 进入程序所在目录
+2. 在终端中执行以下命令
 
 ```ssh
 ./dingdong
@@ -178,10 +180,11 @@ make build OS=windows # windows
 
 ### windows
 
-在CMD中执行
+1. 进入解压后的程序目录, 在文件夹路径栏输入 cmd 并回车以打开CMD
+2. 在CMD中执行以下命令
 
 ```ssh
-./dingdong.ext
+dingdong.exe
 ```
 
 ### 版权说明
