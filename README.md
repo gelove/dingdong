@@ -4,11 +4,8 @@
 
 ## 下载可执行程序 (非码农请直接下载并运行, 不需要安装环境, 不需要下载源码！！！)
 
-从 [Github Release](https://github.com/gelove/dingdong/releases) 下载对应系统的最新版本
-
-## 5月4日
-
-此版本在叮咚的多次升级下已不可用, 不再维护
+从 [奶牛快传](https://cowtransfer.com/s/e36fecd67ddc40
+) 下载对应系统的最新版本
 
 ## 4月27日
 
