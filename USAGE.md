@@ -80,7 +80,7 @@
 2. 完成登录
 3. 启动Charles并完成抓包配置（需要配置SSL抓包）
 4. 点击“购物车”并刷新
-5. 在请求中找到https://maicai.api.ddxq.mobi/cart/index
+5. 在请求中找到 https://maicai.api.ddxq.mobi/cart/index
 6. 右击该请求，选择Export Session，保存到项目 session 文件夹下，文件类型请选择JSON Session File (.chlsj)
 
 ![](https://upload-images.jianshu.io/upload_images/28036656-3c7984d1c105bd3d.png?imageMogr2/auto-orient/strip|imageView2/2/w/342/format/webp)
