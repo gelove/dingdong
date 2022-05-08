@@ -35,17 +35,20 @@
 ![](https://i0.hdslb.com/bfs/album/ed1606f433ee1c8a2adc156c5c829d66a13b91ce.png)
 
 > 配置代理
+
 ![](https://upload-images.jianshu.io/upload_images/28036656-b3c30094b80cd213.png?imageMogr2/auto-orient/strip|imageView2/2/w/483/format/webp)
 ![](https://upload-images.jianshu.io/upload_images/28036656-fea2f7095a491a1b.png?imageMogr2/auto-orient/strip|imageView2/2/w/774/format/webp)
 
 > 添加 ssl 代理
 >
 > 点击菜单栏 <kbd>Proxy</kbd> -> <kbd>SSL Proxying Settings</kbd> -> <kbd>Add</kbd>
-> 
+>
 > Host 与 Port 都填写 * , 点击 <kbd>OK</kbd>
+
 ![](https://i0.hdslb.com/bfs/album/c109f8543a71dd180021edc7a99fc9d33e7163a4.png)
 
 > 安装手机端证书
+
 ![](https://upload-images.jianshu.io/upload_images/28036656-81ca3578c2d5cb5f.png?imageMogr2/auto-orient/strip|imageView2/2/w/969/format/webp)
 
 ### 手机添加证书
@@ -65,7 +68,6 @@
 3. 类型选中 Socks5, 并输入服务器地址(你电脑的IP地址)和端口(8999)
 4. 点击 <kbd>完成</kbd>
 5. 回到主页, 点击右下角 <kbd>▶️</kbd> (注意: 此时手机只能通过Charles代理访问互联网, 不用时及时关闭 Potatso)
-
 
 ## **抓包**
 
