@@ -12,13 +12,13 @@ var (
 )
 
 // MustTransform 转化数据
-func MustTransform(data, out interface{}) {
+func MustTransform(data, out any) {
 	bytes := MustEncode(data)
 	MustDecode(bytes, out)
 }
 
 // MustEncode 编码
-func MustEncode(data interface{}) []byte {
+func MustEncode(data any) []byte {
 	bytes, err := Marshal(data)
 	if err != nil {
 		panic(err)
@@ -27,13 +27,13 @@ func MustEncode(data interface{}) []byte {
 }
 
 // MustEncodeToString 转为json字符串
-func MustEncodeToString(data interface{}) string {
+func MustEncodeToString(data any) string {
 	bs := MustEncode(data)
 	return string(bs)
 }
 
 // MustDecode 解码
-func MustDecode(data []byte, out interface{}) {
+func MustDecode(data []byte, out any) {
 	err := Unmarshal(data, out)
 	if err != nil {
 		panic(err)
@@ -41,6 +41,6 @@ func MustDecode(data []byte, out interface{}) {
 }
 
 // MustDecodeFromString 从字符串转为json对象
-func MustDecodeFromString(data string, out interface{}) {
+func MustDecodeFromString(data string, out any) {
 	MustDecode([]byte(data), out)
 }

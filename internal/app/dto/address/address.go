@@ -8,10 +8,10 @@ type Result struct {
 }
 
 type Data struct {
-	Valid    []Item `json:"valid_address"`
-	Invalid  []Item `json:"invalid_address"`
-	MaxCount int    `json:"max_address_count"`
-	CanAdd   bool   `json:"can_add_address"`
+	Valid    []*Item `json:"valid_address"`
+	Invalid  []*Item `json:"invalid_address"`
+	MaxCount int     `json:"max_address_count"`
+	CanAdd   bool    `json:"can_add_address"`
 }
 
 type Item struct {

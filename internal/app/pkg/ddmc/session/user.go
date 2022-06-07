@@ -10,8 +10,6 @@ import (
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/user_dto"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
-	"dingdong/pkg/json"
 )
 
 func GetUserHeader() map[string]string {
@@ -59,17 +57,17 @@ func GetUser() (*user_dto.Info, error) {
 	params["source_type"] = "mine_page"
 
 	var result user_dto.Result
-	_, err := Client().R().
+	resp, err := Client().R().
 		SetHeaders(headers).
 		SetQueryParams(params).
 		SetResult(&result).
 		SetRetryCount(5).
 		Send(http.MethodGet, api)
 	if err != nil {
-		return nil, errs.Wrap(code.RequestFailed, err)
+		return nil, errs.WithStack(err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.ResponseError, "获取用户信息失败 => "+json.MustEncodeToString(result))
+		return nil, errs.Wrap(errs.GetUserDetailFailed, resp.String())
 	}
 
 	log.Printf("获取用户信息成功, id: %s, name: %s", result.Data.UserInfo.ID, result.Data.UserInfo.Name)

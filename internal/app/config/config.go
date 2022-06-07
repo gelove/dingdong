@@ -20,6 +20,7 @@ type Config struct {
 }
 
 type DingDong struct {
+	ImSecret           string            `yaml:"im_secret"`            // im_secret
 	BaseConcurrency    int               `yaml:"base_concurrency"`     // 基础并发数(除了提交订单的其他请求, 默认为1)
 	SubmitConcurrency  int               `yaml:"submit_concurrency"`   // 提交订单并发数(默认为2)
 	SnapUp             int               `yaml:"snap_up"`              // 抢购开关 0: 关 1: 6点抢 2: 8点半抢 3: 6点和8点半都抢
@@ -32,7 +33,6 @@ type DingDong struct {
 	PayType            int               `yaml:"pay_type"`             // 支付类型
 	Headers            map[string]string `yaml:"headers"`              // 请求头
 	Params             map[string]string `yaml:"params,omitempty"`     // 请求参数
-	Mock               map[string]string `yaml:"mock,omitempty"`       // 模拟参数测试用
 }
 
 type MeiTuan struct {
@@ -62,7 +62,7 @@ var c *conf
 
 func Initialize(path string) {
 	pid := os.Getpid()
-	log.Println("当前程序进程 PID => ", pid)
+	log.Println("当前程序进程 PID =>", pid)
 	c = NewConf(pid, path)
 
 	if !load() {

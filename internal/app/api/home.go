@@ -29,7 +29,7 @@ func init() {
 
 func ConfigView(w http.ResponseWriter, r *http.Request) {
 	conf := config.GetDingDong()
-	err := tmpl.ExecuteTemplate(w, "index.html", map[string]interface{}{"title": "叮咚买菜助手", "conf": conf})
+	err := tmpl.ExecuteTemplate(w, "index.html", map[string]any{"title": "叮咚买菜助手", "conf": conf})
 	if err != nil {
 		_, _ = io.WriteString(w, err.Error()+"\n")
 	}

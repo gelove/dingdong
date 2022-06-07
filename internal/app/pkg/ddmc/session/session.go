@@ -16,7 +16,6 @@ import (
 	"dingdong/internal/app/config"
 	"dingdong/internal/app/dto/address"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/js"
 	"dingdong/pkg/json"
 	"dingdong/pkg/textual"
@@ -30,7 +29,7 @@ var (
 type session struct {
 	UserID  string
 	Client  *req.Client
-	Address address.Item
+	Address *address.Item
 }
 
 func Initialize() {
@@ -49,28 +48,6 @@ func Initialize() {
 
 		setUserID()
 		chooseAddr()
-	})
-}
-
-func InitializeMock() {
-	once.Do(func() {
-		client := req.DevMode().EnableForceHTTP1()
-		// client := req.C().EnableForceHTTP1()
-
-		s = &session{
-			Client: client,
-		}
-
-		mock := config.GetDingDong().Mock
-		s.UserID = mock["ddmc-uid"]
-		s.Address = address.Item{
-			Id:         mock["address_id"],
-			CityNumber: mock["ddmc-city-number"],
-			StationId:  mock["ddmc-station-id"],
-		}
-		longitude, _ := strconv.ParseFloat(mock["ddmc-longitude"], 64)
-		latitude, _ := strconv.ParseFloat(mock["ddmc-latitude"], 64)
-		s.Address.Location.Location = []float64{longitude, latitude}
 	})
 }
 
@@ -103,7 +80,7 @@ func Client() *req.Client {
 	return s.Client
 }
 
-func Address() address.Item {
+func Address() *address.Item {
 	return s.Address
 }
 
@@ -138,7 +115,7 @@ func chooseAddr() {
 		Options: options,
 	}
 	if err := survey.AskOne(sv, &addr); err != nil {
-		panic(errs.Wrap(code.SelectAddressFailed, err))
+		panic(err)
 	}
 
 	index := textual.IndexOf(addr, options)
@@ -204,7 +181,7 @@ func GetParams(headers map[string]string) map[string]string {
 func Sign(params map[string]string) (map[string]string, error) {
 	res, err := js.Call("js/sign.js", "sign", json.MustEncodeToString(params))
 	if err != nil {
-		return nil, err
+		return nil, errs.WithStack(err)
 	}
 	m := make(map[string]string)
 	json.MustDecodeFromString(res.String(), &m)

@@ -1,16 +1,14 @@
 package main
 
 import (
-	"context"
 	"log"
 	"math/rand"
 	"os"
-	"os/signal"
 	"time"
 
 	"dingdong/internal/app"
 	"dingdong/internal/app/config"
-	"dingdong/internal/app/pkg/ddmc/session"
+	"dingdong/internal/app/pkg/ddmc/ios_session"
 )
 
 func init() {
@@ -30,16 +28,7 @@ func main() {
 	}
 	log.Println(dir)
 	config.Initialize(dir + "/config.yml")
-	session.Initialize()
+	ios_session.Initialize("./session")
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		s := <-c
-		log.Printf("Got signal: %+v", s)
-		cancel()
-	}()
-
-	app.Run(ctx)
+	app.Run()
 }

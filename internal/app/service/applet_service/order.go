@@ -1,4 +1,4 @@
-package service
+package applet_service
 
 import (
 	"log"
@@ -11,15 +11,14 @@ import (
 	"dingdong/internal/app/dto"
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/textual"
 
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/pkg/json"
 )
 
-func filterFields(data map[string]interface{}, fields []string) map[string]interface{} {
-	res := make(map[string]interface{})
+func filterFields(data map[string]any, fields []string) map[string]any {
+	res := make(map[string]any)
 	for k, v := range data {
 		if !textual.InArray(k, fields) {
 			continue
@@ -29,15 +28,15 @@ func filterFields(data map[string]interface{}, fields []string) map[string]inter
 	return res
 }
 
-func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes) (map[string]interface{}, error) {
+func CheckOrder(cartMap map[string]any, reserveTime *reserve_time.GoTimes) (map[string]any, error) {
 	api := "https://maicai.api.ddxq.mobi/order/checkOrder"
 
-	packages := make(map[string]interface{})
+	packages := make(map[string]any)
 	for key, val := range cartMap {
 		if key == "products" {
 			productFields := []string{"id", "category_path", "count", "price", "total_money", "instant_rebate_money", "activity_id", "conditions_num", "product_type", "sizes", "type", "total_origin_money", "price_type", "batch_type", "sub_list", "order_sort", "origin_price"}
-			items := val.([]map[string]interface{})
-			products := make([]map[string]interface{}, 0)
+			items := val.([]map[string]any)
+			products := make([]map[string]any, 0)
 			for _, item := range items {
 				products = append(products, filterFields(item, productFields))
 			}
@@ -46,11 +45,11 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		}
 		packages[key] = val
 	}
-	packages["reserved_time"] = map[string]interface{}{
+	packages["reserved_time"] = map[string]any{
 		"reserved_time_start": reserveTime.StartTimestamp,
 		"reserved_time_end":   reserveTime.EndTimestamp,
 	}
-	packagesJson := json.MustEncodeToString([]interface{}{packages})
+	packagesJson := json.MustEncodeToString([]any{packages})
 
 	headers := session.GetHeaders()
 	params := session.GetParams(headers)
@@ -69,7 +68,7 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 	params["showMsg"] = "false"
 	form, err := session.Sign(params)
 	if err != nil {
-		return nil, errs.Wrap(code.SignFailed, err)
+		return nil, err
 	}
 
 	result := dto.Result{}
@@ -80,20 +79,20 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 		// SetRetryCount(50).
 		Send(http.MethodPost, api)
 	if err != nil {
-		return nil, errs.Wrap(code.RequestFailed, err)
+		return nil, errs.WithStack(err)
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.ResponseError, "订单校验失败 => "+json.MustEncodeToString(result))
+		return nil, errs.Wrap(errs.CheckOrderFailed, resp.String())
 	}
 	body, err := resp.ToBytes()
 	if err != nil {
-		return nil, errs.Wrap(code.ParseFailed, err)
+		return nil, errs.Wrap(errs.CheckOrderFailed, resp.String())
 	}
 
 	order := json.Get(body, "data", "order")
 	// log.Println("data.order", order.ToString())
 	freight := order.Get("freights", 0, "freight")
-	res := map[string]interface{}{
+	res := map[string]any{
 		"price":                  order.Get("total_money").ToString(),              // 总价
 		"freight_discount_money": freight.Get("discount_freight_money").ToString(), // 运费折扣
 		"freight_money":          freight.Get("freight_money").ToString(),          // 运费
@@ -106,10 +105,10 @@ func CheckOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTime
 	return res, nil
 }
 
-func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTimes, checkOrderMap map[string]interface{}) error {
+func AddNewOrder(cartMap map[string]any, reserveTime *reserve_time.GoTimes, checkOrderMap map[string]any) error {
 	api := "https://maicai.api.ddxq.mobi/order/addNewOrder"
 
-	paymentOrder := map[string]interface{}{
+	paymentOrder := map[string]any{
 		"reserved_time_start":    reserveTime.StartTimestamp,
 		"reserved_time_end":      reserveTime.EndTimestamp,
 		"parent_order_sign":      cartMap["parent_order_sign"],
@@ -135,7 +134,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		paymentOrder[k] = v
 	}
 
-	packages := map[string]interface{}{
+	packages := map[string]any{
 		"reserved_time_start":     reserveTime.StartTimestamp,
 		"reserved_time_end":       reserveTime.EndTimestamp,
 		"eta_trace_id":            "",
@@ -154,8 +153,8 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		}
 		if key == "products" {
 			productFields := []string{"id", "parent_id", "count", "cart_id", "price", "product_type", "is_booking", "product_name", "small_image", "sale_batches", "order_sort", "sizes"}
-			items := val.([]map[string]interface{})
-			products := make([]map[string]interface{}, 0)
+			items := val.([]map[string]any)
+			products := make([]map[string]any, 0)
 			for _, item := range items {
 				products = append(products, filterFields(item, productFields))
 			}
@@ -165,9 +164,9 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		packages[key] = val
 	}
 
-	packageOrder := map[string]interface{}{
+	packageOrder := map[string]any{
 		"payment_order": paymentOrder,
-		"packages":      []interface{}{packages},
+		"packages":      []any{packages},
 	}
 	packageOrderJson := json.MustEncodeToString(packageOrder)
 
@@ -180,7 +179,7 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 	// log.Printf("AddNewOrder params => %#v", params)
 	form, err := session.Sign(params)
 	if err != nil {
-		return errs.Wrap(code.SignFailed, err)
+		return err
 	}
 
 	result := dto.Result{}
@@ -191,14 +190,14 @@ func AddNewOrder(cartMap map[string]interface{}, reserveTime *reserve_time.GoTim
 		// SetRetryCount(50).
 		Send(http.MethodPost, api)
 	if err != nil {
-		return errs.Wrap(code.RequestFailed, err)
+		return errs.WithStack(err)
 	}
 	if !result.Success {
 		if result.Code == 5004 {
-			return errs.Wrap(code.ResponseError, errs.New(code.ReserveTimeIsDisabled))
+			return errs.WithStack(errs.ReserveTimeIsDisabled)
 		}
-		return errs.WithMessage(code.ResponseError, "提交订单失败 => "+json.MustEncodeToString(result))
+		return errs.Wrap(errs.SubmitOrderFailed, resp.String())
 	}
-	log.Println("恭喜你，已成功下单 =>", resp.String())
+	log.Println("[叮咚]恭喜你，已成功下单 =>", resp.String())
 	return nil
 }

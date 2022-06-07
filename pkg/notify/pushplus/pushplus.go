@@ -1,14 +1,12 @@
 package pushplus
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/imroc/req/v3"
 
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/json"
 	"dingdong/pkg/notify"
 )
@@ -49,11 +47,11 @@ func (b pusher) Send() error {
 		SetBody(json.MustEncode(b)).
 		Send(http.MethodPost, URL)
 	if err != nil {
-		return errs.Wrap(code.RequestFailed, err)
+		return errs.WithStack(err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errs.WithMessage(code.ResponseError, fmt.Sprintf("%d %s", resp.StatusCode, resp.String()))
+		return errs.Wrapf(errs.NotifyFailed, "[%d] %s", resp.StatusCode, resp.String())
 	}
 	return nil
 }

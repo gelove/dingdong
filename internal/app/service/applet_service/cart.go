@@ -1,4 +1,4 @@
-package service
+package applet_service
 
 import (
 	"log"
@@ -7,8 +7,6 @@ import (
 	"dingdong/internal/app/dto"
 	"dingdong/internal/app/pkg/ddmc/session"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
-	"dingdong/pkg/json"
 )
 
 func AllCheck() error {
@@ -21,26 +19,29 @@ func AllCheck() error {
 	params["ab_config"] = `{"key_onion":"D","key_cart_discount_price":"C"}`
 	query, err := session.Sign(params)
 	if err != nil {
-		return errs.Wrap(code.SignFailed, err)
+		return err
 	}
 
 	result := dto.Result{}
-	_, err = session.Client().R().
+	resp, err := session.Client().R().
 		SetHeaders(headers).
 		SetQueryParams(query).
 		SetResult(&result).
 		// SetRetryCount(50).
 		Send(http.MethodGet, api)
 	if err != nil {
-		return errs.Wrap(code.RequestFailed, err)
+		return errs.WithStack(err)
+	}
+	if !resp.IsSuccess() {
+		return errs.Wrap(errs.CheckAllFailed, resp.String())
 	}
 	if !result.Success {
-		return errs.WithMessage(code.ResponseError, "购物车全选失败 => "+json.MustEncodeToString(result))
+		return errs.Wrap(errs.CheckAllFailed, resp.String())
 	}
 	return nil
 }
 
-func GetCart() (map[string]interface{}, error) {
+func GetCart() (map[string]any, error) {
 	api := "https://maicai.api.ddxq.mobi/cart/index"
 
 	headers := session.GetHeaders()
@@ -49,54 +50,56 @@ func GetCart() (map[string]interface{}, error) {
 	params["ab_config"] = `{"key_onion":"D","key_cart_discount_price":"C"}`
 	query, err := session.Sign(params)
 	if err != nil {
-		return nil, errs.Wrap(code.SignFailed, err)
+		return nil, err
 	}
 
 	result := dto.Result{}
-	_, err = session.Client().R().
+	resp, err := session.Client().R().
 		SetHeaders(headers).
 		SetQueryParams(query).
 		SetResult(&result).
 		// SetRetryCount(50).
 		Send(http.MethodGet, api)
 	if err != nil {
-		return nil, errs.Wrap(code.RequestFailed, err)
+		return nil, errs.WithStack(err)
+	}
+	if !resp.IsSuccess() {
+		return nil, errs.Wrap(errs.GetCartFailed, resp.String())
 	}
 	if !result.Success {
-		return nil, errs.WithMessage(code.ResponseError, "获取购物车失败 => "+json.MustEncodeToString(result))
+		return nil, errs.Wrap(errs.GetCartFailed, resp.String())
 	}
-
-	data, ok := result.Data.(map[string]interface{})
+	data, ok := result.Data.(map[string]any)
 	if !ok {
-		return nil, errs.WithMessage(code.AssertFailed, "获取购物车数据失败")
+		return nil, errs.WithStack(errs.GetCartFailed)
 	}
 	// 有效可购的商品
-	list, ok := data["new_order_product_list"].([]interface{})
+	list, ok := data["new_order_product_list"].([]any)
 	if !ok || len(list) == 0 {
-		return nil, errs.New(code.NoValidProduct)
+		return nil, errs.WithStack(errs.NoValidProduct)
 	}
 
-	first, ok := list[0].(map[string]interface{})
+	first, ok := list[0].(map[string]any)
 	if !ok {
-		return nil, errs.WithMessage(code.AssertFailed, "获取购物车产品数据失败")
+		return nil, errs.WithStack(errs.GetCartFailed)
 	}
 	// coupon_rebate_money 优惠券返现金额 我的请求中没有这个字段
-	res := make(map[string]interface{})
+	res := make(map[string]any)
 	for k, v := range first {
 		if k == "products" || v == nil {
 			continue
 		}
 		res[k] = v
 	}
-	productList, ok := first["products"].([]interface{})
+	productList, ok := first["products"].([]any)
 	if !ok {
-		return nil, errs.New(code.AssertFailed)
+		return nil, errs.WithStack(errs.GetCartFailed)
 	}
-	products := make([]map[string]interface{}, 0, len(productList))
+	products := make([]map[string]any, 0, len(productList))
 	for _, v := range productList {
-		product, ok := v.(map[string]interface{})
+		product, ok := v.(map[string]any)
 		if !ok {
-			return nil, errs.New(code.AssertFailed)
+			return nil, errs.WithStack(errs.GetCartFailed)
 		}
 		product["total_money"] = product["total_price"]
 		product["total_origin_money"] = product["total_origin_price"]
@@ -107,7 +110,7 @@ func GetCart() (map[string]interface{}, error) {
 	}
 	res["products"] = products
 
-	if v, ok := data["parent_order_info"].(map[string]interface{}); ok {
+	if v, ok := data["parent_order_info"].(map[string]any); ok {
 		res["parent_order_sign"] = v["parent_order_sign"]
 	}
 	return res, nil

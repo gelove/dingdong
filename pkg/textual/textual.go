@@ -253,3 +253,10 @@ func SortStingNumber(list []string, isAscend bool) []float64 {
 	}
 	return res
 }
+
+func ReplaceBatch(str string, pairs ...[2]string) string {
+	for _, pair := range pairs {
+		str = strings.ReplaceAll(str, pair[0], pair[1])
+	}
+	return str
+}

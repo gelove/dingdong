@@ -10,7 +10,7 @@ import (
 
 var cache sync.Map
 
-func Call(filePath string, functionName string, args ...interface{}) (result otto.Value, err error) {
+func Call(filePath string, functionName string, args ...any) (result otto.Value, err error) {
 	if v, ok := cache.Load(filePath); ok {
 		return call(v.([]byte), functionName, args...)
 	}
@@ -23,7 +23,7 @@ func Call(filePath string, functionName string, args ...interface{}) (result ott
 	return call(bs, functionName, args...)
 }
 
-func call(src []byte, functionName string, args ...interface{}) (result otto.Value, err error) {
+func call(src []byte, functionName string, args ...any) (result otto.Value, err error) {
 	vm := otto.New()
 	_, err = vm.Run(src)
 	if err != nil {

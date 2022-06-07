@@ -2,13 +2,10 @@ package test
 
 import (
 	"dingdong/internal/app/config"
-	"dingdong/internal/app/pkg/ddmc/session"
+	"dingdong/internal/app/pkg/ddmc/ios_session"
 )
 
-const configFile = "../../../config.yml"
-
 func init() {
-	config.Initialize(configFile)
-	// session.Initialize()
-	session.InitializeMock()
+	config.Initialize("../../../config.yml")
+	ios_session.InitializeMock("../../../session", "金山")
 }

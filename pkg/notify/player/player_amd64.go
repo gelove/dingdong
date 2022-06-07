@@ -1,3 +1,5 @@
+//go:build amd64 && (darwin || windows)
+
 package player
 
 import (
@@ -9,7 +11,6 @@ import (
 
 	"dingdong/assets"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/notify"
 )
 
@@ -34,7 +35,7 @@ func (p *Player) Name() string {
 func (p *Player) Send() error {
 	audioFile, err := assets.GetFile(p.Audio)
 	if err != nil {
-		return errs.Wrap(code.Unexpected, err)
+		return errs.WithStack(err)
 	}
 	defer func() {
 		_ = audioFile.Close()
@@ -43,7 +44,7 @@ func (p *Player) Send() error {
 	// 对文件进行解码
 	audioStreamer, format, err := mp3.Decode(audioFile)
 	if err != nil {
-		return errs.Wrap(code.ParseFailed, err)
+		return errs.WithStack(err)
 	}
 
 	defer func() {
@@ -52,7 +53,7 @@ func (p *Player) Send() error {
 	done := make(chan bool)
 	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
 	if err != nil {
-		return errs.Wrap(code.Unexpected, err)
+		return errs.WithStack(err)
 	}
 	speaker.Play(beep.Seq(audioStreamer, beep.Callback(func() {
 		done <- true

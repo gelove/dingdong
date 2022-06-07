@@ -11,25 +11,25 @@ type Result struct {
 }
 
 type Item struct {
-	Closed              bool        `json:"closed"`
-	IsNewRules          bool        `json:"is_new_rules"`
-	DefaultSelect       bool        `json:"default_select"`
-	AreaLevel           int         `json:"area_level"`
-	StationID           string      `json:"station_id"`
-	BusySoonArrivalText string      `json:"busy_soon_arrival_text"`
-	EtaTraceID          string      `json:"eta_trace_id"`
-	Times               []*Time     `json:"time"`
-	StationDelayText    interface{} `json:"station_delay_text"`
+	Closed              bool    `json:"closed"`
+	IsNewRules          bool    `json:"is_new_rules"`
+	DefaultSelect       bool    `json:"default_select"`
+	AreaLevel           int     `json:"area_level"`
+	StationID           string  `json:"station_id"`
+	BusySoonArrivalText string  `json:"busy_soon_arrival_text"`
+	EtaTraceID          string  `json:"eta_trace_id"`
+	Times               []*Time `json:"time"`
+	StationDelayText    any     `json:"station_delay_text"`
 }
 
 type Time struct {
-	IsInvalid        bool        `json:"is_invalid"`
-	DateStrTimestamp int         `json:"date_str_timestamp"`
-	DateStr          string      `json:"date_str"`
-	Day              string      `json:"day"`
-	Times            []*GoTimes  `json:"times"`
-	InvalidPrompt    interface{} `json:"invalid_prompt"`
-	TimeFullTextTip  interface{} `json:"time_full_text_tip"`
+	IsInvalid        bool       `json:"is_invalid"`
+	DateStrTimestamp int        `json:"date_str_timestamp"`
+	DateStr          string     `json:"date_str"`
+	Day              string     `json:"day"`
+	Times            []*GoTimes `json:"times"`
+	InvalidPrompt    any        `json:"invalid_prompt"`
+	TimeFullTextTip  any        `json:"time_full_text_tip"`
 }
 
 type GoTimes struct {

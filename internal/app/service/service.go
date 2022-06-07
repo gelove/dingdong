@@ -13,16 +13,18 @@ import (
 	"dingdong/internal/app/dto/reserve_time"
 	"dingdong/internal/app/pkg/date"
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
-	"dingdong/internal/app/service/meituan"
+	"dingdong/internal/app/service/ios_service"
 	"dingdong/internal/app/service/notify"
+	"dingdong/pkg/json"
 )
 
 const (
-	FirstSnapUp = iota + 1
+	FirstSnapUp = 1 << iota
 	SecondSnapUp
 	PickUpMode
 )
+
+type errCode uintptr
 
 const (
 	durationMinMillis = 450
@@ -37,8 +39,8 @@ type Task struct {
 	Finished      context.CancelFunc
 	completed     bool
 	reserveTime   *reserve_time.GoTimes
-	cartMap       map[string]interface{}
-	checkOrderMap map[string]interface{}
+	cartMap       map[string]any
+	checkOrderMap map[string]string
 }
 
 func NewTask() *Task {
@@ -62,7 +64,11 @@ func (t *Task) SetCompleted(completed bool) *Task {
 func (t *Task) ReserveTime() *reserve_time.GoTimes {
 	t.RLock()
 	defer t.RUnlock()
-	return t.reserveTime
+	if t.reserveTime == nil {
+		return nil
+	}
+	reserveTime := *t.reserveTime
+	return &reserveTime
 }
 
 func (t *Task) SetReserveTime(reserveTime *reserve_time.GoTimes) *Task {
@@ -74,13 +80,18 @@ func (t *Task) SetReserveTime(reserveTime *reserve_time.GoTimes) *Task {
 	return t
 }
 
-func (t *Task) CartMap() map[string]interface{} {
+func (t *Task) CartMap() map[string]any {
 	t.RLock()
 	defer t.RUnlock()
-	return t.cartMap
+	if t.cartMap == nil {
+		return nil
+	}
+	copyCart := make(map[string]any)
+	json.MustTransform(t.cartMap, &copyCart)
+	return copyCart
 }
 
-func (t *Task) SetCartMap(cartMap map[string]interface{}) *Task {
+func (t *Task) SetCartMap(cartMap map[string]any) *Task {
 	t.Lock()
 	defer t.Unlock()
 	if cartMap != nil {
@@ -89,13 +100,18 @@ func (t *Task) SetCartMap(cartMap map[string]interface{}) *Task {
 	return t
 }
 
-func (t *Task) CheckOrderMap() map[string]interface{} {
+func (t *Task) CheckOrderMap() map[string]string {
 	t.RLock()
 	defer t.RUnlock()
-	return t.checkOrderMap
+	if t.checkOrderMap == nil {
+		return nil
+	}
+	orderMap := make(map[string]string)
+	json.MustTransform(t.checkOrderMap, &orderMap)
+	return orderMap
 }
 
-func (t *Task) SetCheckOrderMap(checkOrderMap map[string]interface{}) *Task {
+func (t *Task) SetCheckOrderMap(checkOrderMap map[string]string) *Task {
 	t.Lock()
 	defer t.Unlock()
 	if checkOrderMap != nil {
@@ -113,7 +129,7 @@ func (t *Task) AllCheck() {
 			log.Println("AllCheck finished")
 			return
 		default:
-			err := AllCheck()
+			err := ios_service.AllCheck()
 			if err != nil {
 				log.Println(err)
 				duration := durationMinMillis + rand.Intn(durationGapMillis)
@@ -135,14 +151,12 @@ func (t *Task) GetCart() {
 			return
 		default:
 			duration := durationMinMillis + rand.Intn(durationGapMillis)
-			cartMap, err := GetCart()
+			cartMap, err := ios_service.GetCart()
 			if err != nil {
 				log.Println(err)
-				if e, ok := err.(errs.Error); ok {
-					if e.CodeEqual(code.NoValidProduct) {
-						t.Finished()
-						return
-					}
+				if errs.Is(err, errs.NoValidProduct) {
+					t.Finished()
+					return
 				}
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
@@ -161,19 +175,24 @@ func (t *Task) GetMultiReserveTime() {
 			log.Println("GetMultiReserveTime finished")
 			return
 		default:
-			if t.CartMap() == nil {
+			cartMap := t.CartMap()
+			if cartMap == nil {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
 			duration := durationMinMillis + rand.Intn(durationGapMillis)
-			reserveTime, err := GetMultiReserveTime(t.CartMap())
+			reserveTime, err := ios_service.GetMultiReserveTime(cartMap)
 			if err != nil {
 				log.Println(err)
+				if errs.Is(err, errs.NoReserveTimeAndRetry) {
+					t.Finished()
+					return
+				}
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
 			}
 			t.SetReserveTime(reserveTime)
-			log.Println("===== 有效运力时段已更新 =====")
+			log.Printf("[叮咚]发现可用运力[%s-%s], 请尽快下单!", reserveTime.StartTime, reserveTime.EndTime)
 			// log.Println("reserveTime => ", json.MustEncodeToString(reserveTime))
 			<-time.After(time.Duration(duration) * time.Millisecond)
 		}
@@ -181,7 +200,7 @@ func (t *Task) GetMultiReserveTime() {
 }
 
 func (t *Task) MockMultiReserveTime() {
-	reserveTime := MockMultiReserveTime()
+	reserveTime := ios_service.MockMultiReserveTime()
 	t.SetReserveTime(reserveTime)
 }
 
@@ -193,12 +212,14 @@ func (t *Task) CheckOrder() {
 			log.Println("CheckOrder finished")
 			return
 		default:
-			if t.CartMap() == nil || t.ReserveTime() == nil {
+			cartMap := t.CartMap()
+			reserveTime := t.ReserveTime()
+			if cartMap == nil || reserveTime == nil {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
 			duration := durationMinMillis + rand.Intn(durationGapMillis)
-			checkOrderMap, err := CheckOrder(t.CartMap(), t.ReserveTime())
+			checkOrderMap, err := ios_service.CheckOrder(cartMap)
 			if err != nil {
 				log.Println(err)
 				<-time.After(time.Duration(duration) * time.Millisecond)
@@ -220,19 +241,20 @@ func (t *Task) AddNewOrder() {
 			log.Println("AddNewOrder finished")
 			return
 		default:
-			if t.CartMap() == nil || t.ReserveTime() == nil || t.CheckOrderMap() == nil {
+			cartMap := t.CartMap()
+			reserveTime := t.ReserveTime()
+			orderMap := t.CheckOrderMap()
+			if cartMap == nil || reserveTime == nil || orderMap == nil {
 				<-time.After(10 * time.Millisecond)
 				continue
 			}
 			log.Println("===== 准备提交订单 =====")
-			err := AddNewOrder(t.CartMap(), t.ReserveTime(), t.CheckOrderMap())
+			err := ios_service.AddNewOrder(cartMap, reserveTime, orderMap)
 			if err != nil {
-				_err := errs.New(code.ReserveTimeIsDisabled)
-				if !errs.As(err, &_err) {
-					t.Finished()
-					return
-				}
 				log.Println(err)
+				if errs.Is(err, errs.ReserveTimeIsDisabled) {
+					t.SetReserveTime(nil)
+				}
 				duration := 20 + rand.Intn(80)
 				<-time.After(time.Duration(duration) * time.Millisecond)
 				continue
@@ -254,7 +276,7 @@ func (t *Task) AddNewOrder() {
 	}
 }
 
-func timeTrigger() int {
+func TimeTrigger() int {
 	conf := config.GetDingDong()
 	now := time.Now()
 	firstTime := date.FirstSnapUpUnix()
@@ -295,9 +317,9 @@ func SnapUpOnce(mode int) {
 		}
 	}
 
-	if mode == FirstSnapUp || mode == SecondSnapUp {
-		task.MockMultiReserveTime() // 更新运力
-	}
+	// if mode == FirstSnapUp || mode == SecondSnapUp {
+	// 	task.MockMultiReserveTime() // 更新运力
+	// }
 
 	for i := 0; i < conf.BaseConcurrency; i++ {
 		task.Add(1)
@@ -318,110 +340,31 @@ func SnapUpOnce(mode int) {
 	task.Wait()
 }
 
-// SnapUp 抢购
-func SnapUp(ctx context.Context) {
-	timer := time.Tick(time.Second)
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("SnapUp force stopped")
-			return
-		case <-timer:
-			mode := timeTrigger()
-			if mode > 0 {
-				go SnapUpOnce(mode)
-			}
-		}
-	}
-}
-
-// PickUp 捡漏
-func PickUp(ctx context.Context, pickUpCh <-chan struct{}) {
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("PickUp force stopped")
-			return
-		case <-pickUpCh:
-			go SnapUpOnce(PickUpMode)
-		}
-
-	}
-}
-
-func MonitorAndPickUp(cartMap map[string]interface{}, notifyCh chan<- struct{}, pickUpCh chan<- struct{}) {
-	_, err := GetMultiReserveTime(cartMap)
+func getDetails() string {
+	list, err := GetHomeFlowDetail()
 	if err != nil {
-		log.Println(err)
-		return
+		log.Printf("获取首页产品失败 => %+v", err)
 	}
-
-	conf := config.GetDingDong()
-	if conf.PickUpNeeded {
-		pickUpCh <- struct{}{}
-	}
-
-	if conf.NotifyNeeded {
-		notifyCh <- struct{}{}
-	}
-
-	<-time.After(time.Duration(conf.MonitorSuccessWait) * time.Minute)
-}
-
-func DingDongNotify(notifyCh <-chan struct{}) {
-	for {
-		<-notifyCh
-		list, err := GetHomeFlowDetail()
-		if err != nil {
-			log.Printf("获取首页产品失败 => %+v", err)
+	productNames := make([]string, 0, 10)
+	for i, item := range list {
+		if i >= 10 {
+			continue
 		}
-		productNames := make([]string, 0, 10)
-		for i, item := range list {
-			if i >= 10 {
-				continue
-			}
-			letter := []rune(item.Name)
-			if len(letter) > 5 {
-				productNames = append(productNames, string(letter[:5]))
-				continue
-			}
-			productNames = append(productNames, string(letter))
+		letter := []rune(item.Name)
+		if len(letter) > 5 {
+			productNames = append(productNames, string(letter[:5]))
+			continue
 		}
-
-		ellipsis := ""
-		if len(list) >= 10 {
-			ellipsis = "..."
-		}
-		products := strings.Join(productNames, " ")
-
-		Notify(fmt.Sprintf("叮咚买菜当前有运力请尽快下单[%s%s]", products, ellipsis))
-	}
-}
-
-func MeiTuanMonitorAndNotify(notifyCh chan<- struct{}) {
-	result, err := meituan.GetMultiReserveTime()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	if result.Data.CycleType != 0 {
-		log.Println("美团 =>", result.Data.Msg)
-		return
+		productNames = append(productNames, string(letter))
 	}
 
-	conf := config.GetMeiTuan()
-	if conf.NotifyNeeded {
-		notifyCh <- struct{}{}
+	ellipsis := ""
+	if len(list) >= 10 {
+		ellipsis = "..."
 	}
+	products := strings.Join(productNames, " ")
 
-	<-time.After(time.Duration(conf.MonitorSuccessWait) * time.Minute)
-}
-
-func MeiTuanNotify(notifyCh <-chan struct{}) {
-	for {
-		<-notifyCh
-		Notify("美团买菜当前有运力请尽快下单")
-	}
+	return fmt.Sprintf("[叮咚买菜]当前有配送运力请尽快下单[%s%s]", products, ellipsis)
 }
 
 func Notify(content string) {
@@ -451,21 +394,21 @@ func Notify(content string) {
 }
 
 func AddOrder() error {
-	err := AllCheck()
+	err := ios_service.AllCheck()
 	if err != nil {
 		return err
 	}
-	cartMap, err := GetCart()
+	cartMap, err := ios_service.GetCart()
 	if err != nil {
 		return err
 	}
-	reserveTimes, err := GetMultiReserveTime(cartMap)
+	reserveTimes, err := ios_service.GetMultiReserveTime(cartMap)
 	if err != nil {
 		return err
 	}
-	orderMap, err := CheckOrder(cartMap, reserveTimes)
+	orderMap, err := ios_service.CheckOrder(cartMap)
 	if err != nil {
 		return err
 	}
-	return AddNewOrder(cartMap, reserveTimes, orderMap)
+	return ios_service.AddNewOrder(cartMap, reserveTimes, orderMap)
 }

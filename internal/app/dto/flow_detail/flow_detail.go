@@ -10,23 +10,23 @@ type Result struct {
 		PageSize  int    `json:"page_size"`
 		StartLoad int    `json:"start_load"`
 	} `json:"data"`
-	ServerTime    int         `json:"server_time"`
-	ExecTime      int         `json:"exec_time"`
-	RequestId     string      `json:"request_id"`
-	PreviewConfig interface{} `json:"preview_config"`
+	ServerTime    int    `json:"server_time"`
+	ExecTime      int    `json:"exec_time"`
+	RequestId     string `json:"request_id"`
+	PreviewConfig any    `json:"preview_config"`
 }
 
 type Item struct {
-	Price       string        `json:"price"`
-	Name        string        `json:"name"`
-	Spec        string        `json:"spec"`
-	Sizes       []interface{} `json:"sizes"`
-	Status      int           `json:"status"`
-	Type        int           `json:"type"`
-	Activity    []interface{} `json:"activity"`
-	Oid         int           `json:"oid"`
-	Id          string        `json:"id"`
-	OriginPrice string        `json:"origin_price"`
-	VipPrice    string        `json:"vip_price"`
-	StockNumber int           `json:"stock_number"`
+	Price       string `json:"price"`
+	Name        string `json:"name"`
+	Spec        string `json:"spec"`
+	Sizes       []any  `json:"sizes"`
+	Status      int    `json:"status"`
+	Type        int    `json:"type"`
+	Activity    []any  `json:"activity"`
+	Oid         int    `json:"oid"`
+	Id          string `json:"id"`
+	OriginPrice string `json:"origin_price"`
+	VipPrice    string `json:"vip_price"`
+	StockNumber int    `json:"stock_number"`
 }

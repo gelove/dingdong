@@ -9,7 +9,6 @@ import (
 	"github.com/imroc/req/v3"
 
 	"dingdong/internal/app/pkg/errs"
-	"dingdong/internal/app/pkg/errs/code"
 	"dingdong/pkg/notify"
 )
 
@@ -65,11 +64,11 @@ func (b bark) Send() error {
 	url := fmt.Sprintf("%s/%s/%s/%s?sound=%s&icon=%s", b.Api, b.DeviceKey, b.Title, b.Body, b.Sound, b.Icon)
 	resp, err := req.C().R().Send(http.MethodGet, url)
 	if err != nil {
-		return errs.Wrap(code.RequestFailed, err)
+		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errs.WithMessage(code.ResponseError, fmt.Sprintf("%d %s", resp.StatusCode, resp.String()))
+		return errs.Wrapf(errs.NotifyFailed, "[%d] %s", resp.StatusCode, resp.String())
 	}
 	return nil
 }
